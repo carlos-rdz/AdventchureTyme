@@ -26,3 +26,16 @@ values
 (1,1,'aasdfasd'),
 (1,2,'sdfsdfsf'),
 (1,3,'asdfasdf');
+
+
+
+-- select user_id,response,completed,questions.question,questions.ord, adventures.name from userQuestions
+-- join questions 
+-- on questions.id = userquestions.question_id
+-- join adventures
+-- on adventures.id = questions.adventure_id
+-- and completed is NULL
+-- where user_id = 1
+-- order by questions.ord
+
+-- ;
