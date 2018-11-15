@@ -2,6 +2,8 @@ require('dotenv').config();
 
 const users = require('./models/users');
 const adventure = require('./models/adventure');
+const questions = require('./models/questions');
+const userquestions = require('./models/userquestions');
 
 const cloudinary = require('cloudinary');
 cloudinary.config({ 
@@ -15,5 +17,8 @@ cloudinary.config({
 //   function(error, result) {console.log(result, error)})
 //     .then(console.log(test.phash));
 
-adventure.getAdventureByName("New York")
+
+questions.getQuestionByAdventure(1)
+  .then(data => userquestions.createUserQuestions(1,data))
   .then(console.log)
+// userquestions.createUserQuestions(1)
