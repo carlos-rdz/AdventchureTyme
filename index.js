@@ -5,8 +5,6 @@ const adventure = require('./models/adventure');
 const questions = require('./models/questions');
 const userquestions = require('./models/userquestions');
 
-<<<<<<< HEAD
-=======
 const express = require('express');
 const cloudinary = require('cloudinary');
 cloudinary.config({ 
@@ -14,7 +12,6 @@ cloudinary.config({
     api_key: process.env.CLOUD_KEY, 
     api_secret: process.env.CLOUD_SECRET
   });
->>>>>>> Kllicks/routes02
 
 app.use(express.static('public'));
 
