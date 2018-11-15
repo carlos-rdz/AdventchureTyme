@@ -31,6 +31,9 @@ static createUserQuestions(user,ArrayofQuestionClasses){
 
 // UPDATE
 
+// RETRIEVE
+// GET adventure for user by userquestionid
+
 // DELETE
 }
 

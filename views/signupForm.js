@@ -2,6 +2,8 @@
 function signupForm(){
 
     return `
+    <container>
+    
     <form action="/signup" method="POST">
     <label> Name </label>
         <input type="text" name="name"  >
@@ -14,6 +16,7 @@ function signupForm(){
         <br>
         <input type="submit">
     </form>
+    <container>
     `;
 }
 
