@@ -1,7 +1,9 @@
 create table users
 (id serial primary key,
 name text,
-phonenumber text
+phonenumber text,
+username text,
+phash text
 );
 
 create table adventures
