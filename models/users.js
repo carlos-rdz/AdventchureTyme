@@ -55,6 +55,11 @@ class User {
         }) .then(console.log)
     }
 
+    passwordDoesMatch(thePassword) {
+        const didMatch = bcrypt.compareSync(thePassword, this.phash);
+        return didMatch;
+    }
+
 // UPDATE
 
 

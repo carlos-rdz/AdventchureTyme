@@ -47,22 +47,38 @@ const showUser = require('./views/showUser');
 //----------
     // add signup and login redirects
 app.get('/', (req, res) => {
-    // need page from views
+    const thePage = page('this will have a signup or login option');
+    res.send(thePage);
 }); 
 
 // Login
 //-------
 app.get('/login', (req, res) => {
-    
+    const theForm = loginForm();
+    const thePage = page(theForm);
+    res.send(thePage);
 });
 
-app.post('login', (req, res) => {
+app.post('/login', (req, res) => {
     const theUsername = req.body.username;
     const thePassword = req.body.password;
 
     // find User by username - need RETRIEVE for findByUsername
-    
-    // Check if password matches - need bcrypt first
+    users.getUserByUserName(theUsername)
+        .catch(err => {
+            console.log(err);
+            res.redirect('/login');
+        })
+        // Check if password matches - need bcrypt first
+        .then(theUser => {
+            if (theUser.passwordDoesMatch(thePassword)) {
+                req.param.user = theUser;
+                res.redirect(`/profile/${theUser.id}`);
+            } else {
+                res.redirect('/login');
+            }
+        })
+// once sessions is added we will add a logout route
 
 });
 
@@ -98,7 +114,7 @@ app.post('/signup', (req, res) => {
 app.get('/profile/:id([0-9]+)', (req,res) => {
     users.getUserById(req.params.id)
         .catch(err => {
-            //change to some sort of redirect
+            console.log(err);
             res.redirect('/login');
         })
         .then(theUser => {

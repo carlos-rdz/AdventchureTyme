@@ -2,7 +2,7 @@
 function signupForm(){
 
     return `
-    <form action="/register" method="POST">
+    <form action="/signup" method="POST">
     <label> Name </label>
         <input type="text" name="name"  >
     <label> Phone Number </label>
