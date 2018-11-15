@@ -6,12 +6,11 @@ const questions = require('./models/questions');
 const userquestions = require('./models/userquestions');
 
 const express = require('express');
-const cloudinary = require('cloudinary');
-cloudinary.config({ 
-    cloud_name: process.env.CLOUD_NAME, 
-    api_key: process.env.CLOUD_KEY, 
-    api_secret: process.env.CLOUD_SECRET
-  });
+const app = express();
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 
 app.use(express.static('public'));
 
@@ -32,9 +31,9 @@ const showUser = require('./views/showUser');
 //     .then(console.log(test.phash));
 
 
-questions.getQuestionsByAdventure(2)
-  .then(data => userquestions.createUserQuestions(1,data))
-  .then(console.log)
+// questions.getQuestionsByAdventure(2)
+//   .then(data => userquestions.createUserQuestions(1,data))
+//   .then(console.log)
 // userquestions.createUserQuestions(1)
 
 // add protected route function
@@ -96,7 +95,7 @@ app.post('/signup', (req, res) => {
 // Profile
 //---------
 // show list of adventures this user has added
-app.get('/profile/:id([0-9]+', (req,res) => {
+app.get('/profile/:id([0-9]+)', (req,res) => {
     users.getUserById(req.params.id)
         .catch(err => {
             //change to some sort of redirect
@@ -117,9 +116,11 @@ app.get('/browse', (req, res) => {
         })
 });
 
+app.listen(3000, () => {
+    console.log('your express app is readddddy')
+});
 
 
-
-users.createUser("test","7707513422","test","test")
-    .then(console.log)
+// users.createUser("test","7707513422","test","test")
+//     .then(console.log)
 
