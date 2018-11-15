@@ -41,6 +41,19 @@ static getAdventureByName(name){
             return new Adventure (data.id,data.name,data.creator)
         })
 }
+static getAllAdventures(){
+    return db.any(`select * from adventures
+    `)
+        .then(dataArray => {
+            let adventureArray = dataArray.map(indAdventure => {
+                return new Adventure (indAdventure.id,indAdventure.name,indAdventure.creator)
+            })
+            return adventureArray
+        })
+}
+
+
+// add get all
 }
 
 module.exports = Adventure

@@ -24,6 +24,7 @@ app.use(bodyParser.json());
 //   function(error, result) {console.log(result, error)})
 //     .then(console.log(test.phash));
 
+
 questions.getQuestionsByAdventure(2)
   .then(data => userquestions.createUserQuestions(1,data))
   .then(console.log)
@@ -103,4 +104,12 @@ app.get('/browse', (req, res) => {
 });
 
 
+// questions.getQuestionsByAdventure(2)
+//   .then(data => userquestions.createUserQuestions(1,data))
+//   .then(console.log)
+// userquestions.createUserQuestions(1)
+
+
+adventure.getAllAdventures()
+  .then(console.log)
 
