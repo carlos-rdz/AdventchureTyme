@@ -5,6 +5,16 @@ const adventure = require('./models/adventure');
 const questions = require('./models/questions');
 const userquestions = require('./models/userquestions');
 
+<<<<<<< HEAD
+=======
+const express = require('express');
+const cloudinary = require('cloudinary');
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME, 
+    api_key: process.env.CLOUD_KEY, 
+    api_secret: process.env.CLOUD_SECRET
+  });
+>>>>>>> Kllicks/routes02
 
 app.use(express.static('public'));
 
@@ -13,6 +23,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Configure body-parser to read JSON bodies
 app.use(bodyParser.json());
+
+const page = require('./views/page');
+const loginForm = require('./views/loginForm');
+const signupForm = require('./views/signupForm');
+const adventureList = require('./views/adventureList');
+const showUser = require('./views/showUser');
 
 //   let test = cloudinary.v2.uploader.upload("./images/stonemtn.jpeg", {phash:true},
 //   function(error, result) {console.log(result, error)})
@@ -41,7 +57,7 @@ app.get('/', (req, res) => {
 // Login
 //-------
 app.get('/login', (req, res) => {
-
+    
 });
 
 app.post('login', (req, res) => {
@@ -57,7 +73,9 @@ app.post('login', (req, res) => {
 // Signup
 //--------
 app.get('/signup', (req, res) => {
-    // need signup form
+    const theForm = signupForm();
+    const thePage = page(theForm);
+    res.send(thePage);
 });
 
 app.post('/signup', (req, res) => {
@@ -94,7 +112,12 @@ app.get('/profile/:id([0-9]+', (req,res) => {
 
 // Browse Adventure
 app.get('/browse', (req, res) => {
-    //get all adventures
+    adventure.getAllAdventures()
+        .then(allAdventures => {
+            const adventureUL = adventureList(allAdventures);
+            const thePage = page(adventureUL);
+            res.send(thePage);
+        })
 });
 
 
