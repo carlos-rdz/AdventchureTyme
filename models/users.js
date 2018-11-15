@@ -1,29 +1,46 @@
 const db = require('./db');
 
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
 class User {
-    constructor(id,name) {
+    constructor(id,name,phonenumber,username,phash) {
         this.id = id;
         this.name = name;
+        this.phonenumber = phonenumber;
+        this.username = username;
+        this.phash = phash;
     }
 // CREATE
-    static createUser(name){
+    static createUser(name,phonenumber,username,password){
+        const salt = bcrypt.genSaltSync(saltRounds)
+        const phash = bcrypt.hashSync(password,salt)
         return db.one(`insert into users
-        (name)
+        (name,phonenumber,username,phash)
         values
-        ($1)
-        returning id`,[name])
+        ($1,$2,$3,$4)
+        returning id`,[name,phonenumber,username,phash])
             .then(data => {
-                return new User (data.id, name);
+                return new User (data.id, name, phonenumber,username,phash);
             })
 }
 
 // RETRIEVE
+    static getUserByUserName(username){
+        return db.one(
+        `select * from users where username=$1`,[username]
+        )
+        .then(data => {
+            return new User (data.id,data.name,data.phonenumber,data.username,data.phash)
+        })
+    }
+
     static getUserById(id){
         return db.one(
         `select * from users where id=$1`,[id]
         )
         .then(data => {
-            return new User (data.id,data.name)
+            return new User (data.id,data.name,data.phonenumber,data.username,data.phash)
         })
     }
 
@@ -32,7 +49,7 @@ class User {
             `select * from users`
         ).then(data => {
             let userArray = data.map(indUser => {
-                return new User (indUser.id,indUser.name)
+                return new User (data.id,data.name,data.phonenumber,data.username,data.phash)
             })
         return userArray
         }) .then(console.log)
