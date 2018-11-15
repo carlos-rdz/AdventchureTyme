@@ -12,13 +12,11 @@ cloudinary.config({
     api_secret: process.env.CLOUD_SECRET
   });
   
-
 //   let test = cloudinary.v2.uploader.upload("./images/stonemtn.jpeg", {phash:true},
 //   function(error, result) {console.log(result, error)})
 //     .then(console.log(test.phash));
 
-
-questions.getQuestionsByAdventure(1)
+questions.getQuestionsByAdventure(2)
   .then(data => userquestions.createUserQuestions(1,data))
   .then(console.log)
 // userquestions.createUserQuestions(1)

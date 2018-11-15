@@ -14,16 +14,19 @@ class UserQuestions {
 // nee to fix this
 
 static createUserQuestions(user,ArrayofQuestionClasses){
-   ArrayofQuestionClasses.forEach(element => {
+   return Promise.all(ArrayofQuestionClasses.map(element => {
         return db.one(`insert into userquestions
         (user_id,question_id)
         values
         ($1,$2)
         returning id`,[user,element.id])
-            .then(data => {
-                return new UserQuestions (data.id, user, element.id, response=null, completed=null);
+    }))
+        .then(arrayOfData => {
+            return arrayOfData.map( (id,index) => {
+                return new UserQuestions (id.id, user, ArrayofQuestionClasses[index].id, null, null)
             })
-    });
+        }
+                )
 }
 
 // UPDATE

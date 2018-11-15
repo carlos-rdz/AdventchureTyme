@@ -1,7 +1,7 @@
 insert into users
-(name)
+(name,phonenumber)
 values
-('Carlos'),('Kyle'),('Michael');
+('Carlos','4564564563'),('Kyle','3456789706'),('Michael','4562340695');
 
 insert into adventures
 (name)

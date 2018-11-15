@@ -1,12 +1,14 @@
 create table users
 (id serial primary key,
-name text
+name text,
+phonenumber text
 );
 
 create table adventures
 (id serial primary key,
 name text,
-creator integer references users (id) on delete cascade
+creator integer references users (id) on delete cascade,
+picture text
 );
 
 create table questions
