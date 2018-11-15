@@ -1,6 +1,5 @@
 const db = require('./db');
 
-
 class UserQuestions {
     constructor(id,user_id,question_id,response,completed) {
         this.id = id;
@@ -27,20 +26,9 @@ static createUserQuestions(user,ArrayofQuestionClasses){
     });
 }
 
-    
-
-
 // UPDATE
 
-
-
-
 // DELETE
-
-
-
-
-
 }
 
 module.exports = UserQuestions

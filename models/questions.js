@@ -1,6 +1,5 @@
 const db = require('./db');
 
-
 class Question {
     constructor(id,question,answer,ord,adventure_id) {
         this.id = id;
@@ -25,7 +24,6 @@ static createQuestion(question,answer,ord,adventure_id){
 }
 
 // RETRIEVE
-
 static getQuestionsByAdventure(adventure_id){
     return db.any('select * from questions where adventure_id=$1',[adventure_id])
         .then(data => {
@@ -36,18 +34,9 @@ static getQuestionsByAdventure(adventure_id){
         })
 }
     
-
-
 // UPDATE
 
-
-
-
 // DELETE
-
-
-
-
 
 }
 

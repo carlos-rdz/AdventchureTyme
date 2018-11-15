@@ -1,6 +1,5 @@
 const db = require('./db');
 
-
 class User {
     constructor(id,name) {
         this.id = id;
@@ -18,10 +17,7 @@ class User {
             })
 }
 
-
-
 // RETRIEVE
-
     static getUserById(id){
         return db.one(
         `select * from users where id=$1`,[id]
@@ -31,9 +27,7 @@ class User {
         })
     }
 
-
     static getAllUsers(){
-
         return db.any(
             `select * from users`
         ).then(data => {
@@ -42,10 +36,7 @@ class User {
             })
         return userArray
         }) .then(console.log)
-
-
     }
-
 
 // UPDATE
 

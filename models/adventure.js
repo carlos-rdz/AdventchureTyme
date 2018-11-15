@@ -43,10 +43,4 @@ static getAdventureByName(name){
 }
 }
 
-
-
-
-
-
-
 module.exports = Adventure
