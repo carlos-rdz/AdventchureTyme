@@ -32,7 +32,6 @@ class User {
     }
 
 
-
     static getAllUsers(){
 
         return db.any(
@@ -42,7 +41,7 @@ class User {
                 return new User (indUser.id,indUser.name)
             })
         return userArray
-        })
+        }) .then(console.log)
 
 
     }

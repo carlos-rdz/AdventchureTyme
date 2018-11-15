@@ -18,7 +18,7 @@ cloudinary.config({
 //     .then(console.log(test.phash));
 
 
-questions.getQuestionByAdventure(1)
+questions.getQuestionsByAdventure(1)
   .then(data => userquestions.createUserQuestions(1,data))
   .then(console.log)
 // userquestions.createUserQuestions(1)

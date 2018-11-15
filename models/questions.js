@@ -26,7 +26,7 @@ static createQuestion(question,answer,ord,adventure_id){
 
 // RETRIEVE
 
-static getQuestionByAdventure(adventure_id){
+static getQuestionsByAdventure(adventure_id){
     return db.any('select * from questions where adventure_id=$1',[adventure_id])
         .then(data => {
             let questionArray = data.map(indQuestion => {

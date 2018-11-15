@@ -10,6 +10,7 @@ constructor(id,name,creator){
 
 }
 // CREATE
+// have to make creator a user id that is automatically passed in
 static createAdventure(name,creator){
     return db.one(`insert into adventures
     (name,creator)
@@ -22,7 +23,6 @@ static createAdventure(name,creator){
     })
 }
 // RETRIEVE
-
 static getAdventuresByCreator(creator){
     return db.any(`select * from adventures
     where creator=$1`, [creator])
@@ -34,8 +34,6 @@ static getAdventuresByCreator(creator){
     })
 
 }
-
-
 static getAdventureByName(name){
     return db.one(`select * from adventures
     where name=$1`, [name])
@@ -43,7 +41,6 @@ static getAdventureByName(name){
             return new Adventure (data.id,data.name,data.creator)
         })
 }
-
 }
 
 
