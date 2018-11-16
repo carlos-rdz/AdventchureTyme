@@ -190,8 +190,8 @@ app.get('/browse', (req, res) => {
 });
 
 // twilio test
-
-const message = require('./message');
+const {https} = require('follow-redirects');
+const message = require('./scripts/message');
 // will text message on route, but just a function 
 // can call it anywhere if we pass appropriate params
 app.get('/sms', (req,res)=> {
@@ -202,18 +202,45 @@ app.get('/sms', (req,res)=> {
 // twilio incoming
 // incoming message
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
+const visionOCR = require('./scripts/visionOCR');
+
 
 app.post('/sms', (req, res) => {
   const twiml = new MessagingResponse();
   let getBody = req.body;
   console.log(getBody);
-
-  twiml.message('The Robots are coming! Head for the hills!');
-
+  let twilioUrl = req.body.MediaUrl0;
+    resolveURL(twilioUrl, (remoteAddress) => {
+        // console.log(remoteAddress);
+//   save image to temp storage
+        const fs = require('fs');
+        const imageDownload = require('image-download');
+        const imageType = require('image-type');
+        
+        imageDownload(`${remoteAddress}`).then(buffer => {
+            const type = imageType(buffer);
+        
+            fs.writeFile('./images/user_submit.' + type.ext, buffer, (err) => { 
+                console.log(err ? err : 'done!')
+                let localAddress = './images/user_submit.jpg'
+                visionOCR(localAddress)
+                // .then(results => {
+                //     twiml.message('The Robots are coming! Head for the hills!');
+                // })
+            });
+        });
+    })
+  
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
 });
 
+// twilio hosts mms images on S3 and the MediaUrl has to be resolved before 
+// I can actually use the address to 
+function resolveURL(address, callback){
+    console.log("entered resolve url");
+    https.get(address,(response) => callback(response.responseUrl))     
+}
 
 app.listen(3000, () => {
     console.log('your express app is readddddy')
