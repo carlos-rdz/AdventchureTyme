@@ -66,7 +66,7 @@ function protectRoute(req, res, next) {
     } else {
         res.redirect(`/`);
     }
-}
+};
 // middleware
 app.use((req, res, next) => {
 
@@ -84,7 +84,7 @@ app.use((req, res, next) => {
 //----------
     // add signup and login redirects
 app.get('/', (req, res) => {
-    const thePage = page('Welcome.  Please login or signup to continue');
+    const thePage = page('Welcome.  Please login or signup to continue', req.session.user);
     res.send(thePage);
 }); 
 
@@ -115,6 +115,7 @@ app.post('/login', (req, res) => {
                 res.redirect('/login');
             }
         })
+});
 
 // Logout
 //--------
@@ -123,8 +124,6 @@ app.post(`/logout`, (req, res) => {
     req.session.destroy();
     // redirect them to homepage
     res.redirect(`/`);
-
-})
 
 });
 
@@ -163,7 +162,7 @@ app.get('/profile',protectRoute, (req,res) => {
     let userId = req.session.user.id
     adventure.getAdventuresByUserId(userId)
         .then(advArray => {
-        res.send(page(userAdventureList(advArray)))
+        res.send(page(userAdventureList(advArray),req.session.user))
 
         })
     // users.getUserById(req.session.user.id)
@@ -176,11 +175,11 @@ app.get('/profile',protectRoute, (req,res) => {
     //     })
 });
 
-app.post('/profile', (req,res) => {
+app.post('/profile', protectRoute, (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
- let adventureId = req.body.adventureId
- let userId = req.session.user.id
+ let adventureId = req.body.adventureId;
+ let userId = req.session.user.id;
     questions.getQuestionsByAdventure(adventureId)
     // this loads the questions to the user
         .then(data => {
@@ -200,7 +199,7 @@ app.post('/profile', (req,res) => {
 app.post('/start', (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
-    res.send(page("you have started the adventure"))
+    res.send(page("you have started the adventure", req.session.user))
     
     // 
 });
@@ -210,7 +209,7 @@ app.get('/browse', protectRoute, (req, res) => {
     adventure.getAllAdventures()
         .then(allAdventures => {
             const adventureUL = adventureList(allAdventures);
-            const thePage = page(adventureUL);
+            const thePage = page(adventureUL, req.session.user);
             res.send(thePage);
         })
 });

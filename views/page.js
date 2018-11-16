@@ -11,19 +11,19 @@ function page(content,isLoggedIn=false){
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     
-       
+      
       </head>
 
       <body class="p-3 mb-2 bg-primary text-white">
         <div class="p-3 mb-2 bg-secondary text-white">
-      ${
-        isLoggedIn ? logoutButton() : loginOrRegister()
-    }
+          ${
+            isLoggedIn ? logoutButton() : loginOrRegister()
+          }
         </div>
         <div class="p-3 mb-2 bg-light text-dark">
           ${content}
         </div>
-           
+          
     
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -34,4 +34,4 @@ function page(content,isLoggedIn=false){
     </html>`;  }
 
 
-module.exports = page
+module.exports = page;
