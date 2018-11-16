@@ -195,9 +195,10 @@ app.get('/browse', (req, res) => {
 // twilio test
 
 const message = require('./message');
-
-app.get('/sms', (req,res)=> {
-    message();
+// will text message on route, but just a function 
+// can call it anywhere if we pass appropriate params
+app.get('/start', (req,res)=> {
+    message("`Welcome to the Adventure! Good Luck!`", '+16789448410', '+17146093784' );
     res.send("message sent");
 });
 
