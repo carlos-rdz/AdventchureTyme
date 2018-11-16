@@ -4,7 +4,7 @@ function adventureToItem(adventureObject){
     <div class="col-sm">
     ${adventureObject.name}
     </div>
-    <form action="/test2" method="POST">
+    <form action="/start" method="POST">
     <input type="submit" value="Start!">
     </form>
     </div>

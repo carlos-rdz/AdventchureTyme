@@ -4,6 +4,9 @@ const users = require('./models/users');
 const adventure = require('./models/adventure');
 const questions = require('./models/questions');
 const userquestions = require('./models/userquestions');
+// have i been pwned??
+const hibp = require('hibp');
+
 
 const express = require('express');
 const app = express();
@@ -52,32 +55,32 @@ const userAdventureList = require('./views/userAdventureList');
 
 // Protected Routes function
 //--------------------------
-// function protectRoute(req, res, next) {
-//     let isLoggedIn = req.session.user ? true : false;
-//     if (isLoggedIn) {
-//         next();
-//     } else {
-//         res.redirect(`/login`);
-//     }
-// }
+function protectRoute(req, res, next) {
+    let isLoggedIn = req.session.user ? true : false;
+    if (isLoggedIn) {
+        next();
+    } else {
+        res.redirect(`/`);
+    }
+};
 // middleware
-// app.use((req, res, next) => {
+app.use((req, res, next) => {
 
-//     let isLoggedIn = req.session.user ? true : false;
+    let isLoggedIn = req.session.user ? true : false;
     
-//     console.log(req.session.user);
-//     console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
+    console.log(req.session.user);
+    console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
 
-//     // We call the next function
-//     next();
+    // We call the next function
+    next();
 
-// });
+});
 
 // Homepage
 //----------
     // add signup and login redirects
 app.get('/', (req, res) => {
-    const thePage = page('Welcome.  Please login or signup to continue');
+    const thePage = page('Welcome.  Please login or signup to continue', req.session.user);
     res.send(thePage);
 }); 
 
@@ -103,12 +106,20 @@ app.post('/login', (req, res) => {
         .then(theUser => {
             if (theUser.passwordDoesMatch(thePassword)) {
                 req.session.user = theUser;
-                res.redirect(`/profile/${theUser.id}`);
+                res.redirect(`/profile`);
             } else {
                 res.redirect('/login');
             }
         })
-// once sessions is added we will add a logout route
+});
+
+// Logout
+//--------
+app.post(`/logout`, (req, res) => {
+    // kill the session
+    req.session.destroy();
+    // redirect them to homepage
+    res.redirect(`/`);
 
 });
 
@@ -134,57 +145,87 @@ app.post('/signup', (req, res) => {
         })
         .then(newUser => {
             // take them to the list of adventures
+            req.session.user = newUser;
             res.redirect('/browse');
         })
+    // have i been pwned???????????????????????????
+    hibp
+        .search(`${newUsername}`)
+        .then(data => {
+        if (data.breaches || data.pastes) {
+        // Bummer...
+        console.log(data);
+        } else {
+        // Phew! We're clear.
+        console.log(`Good news — no pwnage found on username ${newUsername}!`);
+        }
+    })
+        .catch(err => {
+        // Something went wrong.
+        console.log(err.message);
+
+
+  });
+
+
 });
 
 // Profile
 //---------
 // show list of adventures this user has added
-app.get('/profile/:id([0-9]+)', (req,res) => {
-    users.getUserById(req.params.id)
-        .catch(err => {
-            console.log(err);
-            res.redirect('/login');
+
+app.get('/profile',protectRoute, (req,res) => {
+    let userId = req.session.user.id
+    adventure.getAdventuresByUserId(userId)
+        .then(advArray => {
+        res.send(page(userAdventureList(advArray),req.session.user))
+
         })
-        .then(theUser => {
-            res.send(theUser);
-        })
+    // users.getUserById(req.session.user.id)
+    //     .catch(err => {
+    //         console.log(err);
+    //         res.redirect('/login');
+    //     })
+    //     .then(theUser => {
+    //         res.send(theUser);
+    //     })
 });
 
-app.post('/test', (req,res) => {
+app.post('/profile', protectRoute, (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
- let adventureId = req.body.adventureId
+ let adventureId = req.body.adventureId;
+ let userId = req.session.user.id;
     questions.getQuestionsByAdventure(adventureId)
     // this loads the questions to the user
         .then(data => {
-            return userquestions.createUserQuestions(1,data)
+            return userquestions.createUserQuestions(userId,data)
         })
         // this displays the users adventures
         // .then(console.log)
         .then(data => {
-            return adventure.getAdventuresByUserId(1)})
+            return adventure.getAdventuresByUserId(userId)})
             // need to write a view that takes a list of adventures as an argument and returns html list with add button
         .then(dataArray => {
-             res.send(page(userAdventureList(dataArray)))
+            res.redirect('/profile')
+            //  res.send(page(userAdventureList(dataArray)))
             })
         
         });
-app.post('/test2', (req,res) => {
+app.post('/start', (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
-    res.send(page("you have started the adventure"))
+    res.send(page("you have started the adventure", req.session.user))
     
     // 
 });
 
 // Browse Adventure
-app.get('/browse', (req, res) => {
+app.get('/browse', protectRoute, (req, res) => {
     adventure.getAllAdventures()
         .then(allAdventures => {
             const adventureUL = adventureList(allAdventures);
-            const thePage = page(adventureUL);
+            const thePage = page(adventureUL, req.session.user);
             res.send(thePage);
         })
 });

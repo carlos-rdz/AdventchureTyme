@@ -2,7 +2,7 @@ function adventureToItem(adventureObject){
     return `
     <div class="row justify-content-start">
     <div class="col-sm">${adventureObject.name}</div>
-    <form action="/test" method="POST">
+    <form action="/profile" method="POST">
     <input type="submit" value="Add Adventure!">
     <input type="hidden" name="adventureId" value=${adventureObject.id}>
     </form>
