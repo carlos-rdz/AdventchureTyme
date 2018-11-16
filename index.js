@@ -25,6 +25,7 @@ const loginForm = require('./views/loginForm');
 const signupForm = require('./views/signupForm');
 const adventureList = require('./views/adventureList');
 const showUser = require('./views/showUser');
+const userAdventureList = require('./views/userAdventureList');
 
 //   let test = cloudinary.v2.uploader.upload("./images/stonemtn.jpeg", {phash:true},
 //   function(error, result) {console.log(result, error)})
@@ -47,7 +48,7 @@ const showUser = require('./views/showUser');
 //----------
     // add signup and login redirects
 app.get('/', (req, res) => {
-    const thePage = page('this will have a signup or login option');
+    const thePage = page('Welcome.  Please login or signup to continue');
     res.send(thePage);
 }); 
 
@@ -120,6 +121,33 @@ app.get('/profile/:id([0-9]+)', (req,res) => {
         .then(theUser => {
             res.send(theUser);
         })
+});
+
+app.post('/test', (req,res) => {
+// need to grab user ids from session
+// need to grab adventure ids from submit
+ let adventureId = req.body.adventureId
+    questions.getQuestionsByAdventure(adventureId)
+    // this loads the questions to the user
+        .then(data => {
+            return userquestions.createUserQuestions(1,data)
+        })
+        // this displays the users adventures
+        // .then(console.log)
+        .then(data => {
+            return adventure.getAdventuresByUserId(1)})
+            // need to write a view that takes a list of adventures as an argument and returns html list with add button
+        .then(dataArray => {
+             res.send(page(userAdventureList(dataArray)))
+            })
+        
+        });
+app.post('/test2', (req,res) => {
+// need to grab user ids from session
+// need to grab adventure ids from submit
+    res.send(page("you have started the adventure"))
+    
+    // 
 });
 
 // Browse Adventure

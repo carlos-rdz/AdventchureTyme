@@ -14,10 +14,13 @@ function page(content,isLoggedIn=false){
        
       </head>
 
-      <body>
+      <body class="p-3 mb-2 bg-primary text-white">
+        <div class="p-3 mb-2 bg-secondary text-white">
       ${
         isLoggedIn ? logoutButton() : loginOrRegister()
     }
+        </div>
+        <div class="p-3 mb-2 bg-light text-dark">
           ${content}
         </div>
            
