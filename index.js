@@ -26,10 +26,6 @@ const signupForm = require('./views/signupForm');
 const adventureList = require('./views/adventureList');
 const showUser = require('./views/showUser');
 
-//   let test = cloudinary.v2.uploader.upload("./images/stonemtn.jpeg", {phash:true},
-//   function(error, result) {console.log(result, error)})
-//     .then(console.log(test.phash));
-
 
 // questions.getQuestionsByAdventure(2)
 //   .then(data => userquestions.createUserQuestions(1,data))
@@ -132,6 +128,16 @@ app.get('/browse', (req, res) => {
         })
 });
 
+// twilio test
+
+const message = require('./message');
+
+app.get('/sms', (req,res)=> {
+    message();
+    res.send("message sent");
+});
+
+
 app.listen(3000, () => {
     console.log('your express app is readddddy')
 });
@@ -139,4 +145,3 @@ app.listen(3000, () => {
 
 // users.createUser("test","7707513422","test","test")
 //     .then(console.log)
-
