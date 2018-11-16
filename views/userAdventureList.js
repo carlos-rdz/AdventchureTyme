@@ -1,33 +1,36 @@
 function adventureToItem(adventureObject){
     return `
     <div class="row justify-content-start">
-    <div class="col-sm">${adventureObject.name}</div>
-    <form action="/test" method="POST">
-    <input type="submit" value="Add Adventure!">
-    <input type="hidden" name="adventureId" value=${adventureObject.id}>
+    <div class="col-sm">
+    ${adventureObject.name}
+    </div>
+    <form action="/test2" method="POST">
+    <input type="submit" value="Start!">
     </form>
     </div>
     `
+
+    // can i send the adventure id here???
+
     // <div> <a href ="/profile/:id([0-9]+)">Add</a> </div>
     
     // should redirect to session id profile
 }
 
 
-function adventureList(arrayOfAdventures){
+function userAdventureList(arrayOfAdventures){
     
     const adventureItems = arrayOfAdventures.map(adventureToItem).join('');
     
 
 
     return `
-        <div class="container">
-        
+
+    <div class="container">
         ${adventureItems}
-        
-        </div> 
+    </div>
     `
 }
 
 
-module.exports = adventureList
+module.exports = userAdventureList
