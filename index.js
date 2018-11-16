@@ -69,7 +69,8 @@ function protectRoute(req, res, next) {
     } else {
         res.redirect(`/`);
     }
-};
+}
+
 // middleware
 app.use((req, res, next) => {
 
@@ -85,7 +86,6 @@ app.use((req, res, next) => {
 
 // Homepage
 //----------
-    // add signup and login redirects
 app.get('/', (req, res) => {
     const thePage = page('Welcome.  Please login or signup to continue', req.session.user);
     res.send(thePage);
@@ -127,7 +127,6 @@ app.post(`/logout`, (req, res) => {
     req.session.destroy();
     // redirect them to homepage
     res.redirect(`/`);
-
 });
 
 // Signup
@@ -169,11 +168,9 @@ app.post('/signup', (req, res) => {
     })
         .catch(err => {
         // Something went wrong.
-        console.log(err.message);
+            console.log(err.message);
 
-
-  });
-
+        });
 
 });
 
@@ -201,8 +198,8 @@ app.get('/profile',protectRoute, (req,res) => {
 app.post('/profile', protectRoute, (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
- let adventureId = req.body.adventureId;
- let userId = req.session.user.id;
+    let adventureId = req.body.adventureId;
+    let userId = req.session.user.id;
     questions.getQuestionsByAdventure(adventureId)
     // this loads the questions to the user
         .then(data => {
@@ -211,18 +208,20 @@ app.post('/profile', protectRoute, (req,res) => {
         // this displays the users adventures
         // .then(console.log)
         .then(data => {
-            return adventure.getAdventuresByUserId(userId)})
+            return adventure.getAdventuresByUserId(userId)
+        })
             // need to write a view that takes a list of adventures as an argument and returns html list with add button
         .then(dataArray => {
             res.redirect('/profile')
             //  res.send(page(userAdventureList(dataArray)))
-            })
+        })
         
-        });
-app.post('/start', (req,res) => {
+});
+
+app.post('/start', protectRoute, (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
-    res.send(page("you have started the adventure", req.session.user))
+    res.send(page("you have started the adventure", req.session.user));
     
     // 
 });
@@ -244,4 +243,3 @@ app.listen(3000, () => {
 
 // users.createUser("test","7707513422","test","test")
 //     .then(console.log)
-
