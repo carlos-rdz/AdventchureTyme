@@ -18,7 +18,7 @@ app.use(session({
     store: new pgSession({
         pgPromise: db
     }),
-    secret: 'abc123',
+    secret: 'abc123kasfsdbukbfrkqwuehnfioaebgfskdfhgcniw3y4fto7scdghlusdhbv',
     saveUninitialized: false,
     cookie: {
             maxAge: 30 * 24 * 60 * 60 * 1000 
@@ -58,26 +58,26 @@ const showUser = require('./views/showUser');
 
 // Protected Routes function
 //--------------------------
-function protectRoute(req, res, next) {
-    let isLoggedIn = req.session.user ? true : false;
-    if (isLoggedIn) {
-        next();
-    } else {
-        res.redirect(`/login`);
-    }
-}
+// function protectRoute(req, res, next) {
+//     let isLoggedIn = req.session.user ? true : false;
+//     if (isLoggedIn) {
+//         next();
+//     } else {
+//         res.redirect(`/login`);
+//     }
+// }
 // middleware
-app.use((req, res, next) => {
+// app.use((req, res, next) => {
 
-    let isLoggedIn = req.session.user ? true : false;
+//     let isLoggedIn = req.session.user ? true : false;
     
-    console.log(req.session.user);
-    console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
+//     console.log(req.session.user);
+//     console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
 
-    // We call the next function
-    next();
+//     // We call the next function
+//     next();
 
-});
+// });
 
 // Homepage
 //----------
@@ -147,7 +147,7 @@ app.post('/signup', (req, res) => {
 // Profile
 //---------
 // show list of adventures this user has added
-app.get('/profile/:id([0-9]+)', protectRoute, (req,res) => {
+app.get('/profile/:id([0-9]+)', (req,res) => {
     users.getUserById(req.params.id)
         .catch(err => {
             console.log(err);
@@ -159,7 +159,7 @@ app.get('/profile/:id([0-9]+)', protectRoute, (req,res) => {
 });
 
 // Browse Adventure
-app.get('/browse', protectRoute, (req, res) => {
+app.get('/browse', (req, res) => {
     adventure.getAllAdventures()
         .then(allAdventures => {
             const adventureUL = adventureList(allAdventures);
