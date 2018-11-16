@@ -4,6 +4,9 @@ const users = require('./models/users');
 const adventure = require('./models/adventure');
 const questions = require('./models/questions');
 const userquestions = require('./models/userquestions');
+// have i been pwned??
+const hibp = require('hibp');
+
 
 const express = require('express');
 const app = express();
@@ -153,6 +156,26 @@ app.post('/signup', (req, res) => {
             req.session.user = newUser;
             res.redirect('/browse');
         })
+    // have i been pwned???????????????????????????
+    hibp
+        .search(`${newUsername}`)
+        .then(data => {
+        if (data.breaches || data.pastes) {
+        // Bummer...
+        console.log(data);
+        } else {
+        // Phew! We're clear.
+        console.log(`Good news — no pwnage found on username ${newUsername}!`);
+        }
+    })
+        .catch(err => {
+        // Something went wrong.
+        console.log(err.message);
+
+
+  });
+
+
 });
 
 // Profile
