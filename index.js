@@ -110,7 +110,7 @@ app.post('/login', (req, res) => {
         .then(theUser => {
             if (theUser.passwordDoesMatch(thePassword)) {
                 req.session.user = theUser;
-                res.redirect(`/profile/${theUser.id}`);
+                res.redirect(`/profile`);
             } else {
                 res.redirect('/login');
             }
@@ -158,6 +158,7 @@ app.post('/signup', (req, res) => {
 // Profile
 //---------
 // show list of adventures this user has added
+<<<<<<< HEAD
 app.get('/profile/:id([0-9]+)', protectRoute, (req,res) => {
     users.getUserById(req.params.id)
         .catch(err => {
@@ -166,29 +167,48 @@ app.get('/profile/:id([0-9]+)', protectRoute, (req,res) => {
         })
         .then(theUser => {
             res.send(theUser);
+=======
+
+app.get('/profile', (req,res) => {
+    let userId = req.session.user.id
+    adventure.getAdventuresByUserId(userId)
+        .then(advArray => {
+        res.send(page(userAdventureList(advArray)))
+
+>>>>>>> master
         })
+    // users.getUserById(req.session.user.id)
+    //     .catch(err => {
+    //         console.log(err);
+    //         res.redirect('/login');
+    //     })
+    //     .then(theUser => {
+    //         res.send(theUser);
+    //     })
 });
 
-app.post('/test', (req,res) => {
+app.post('/profile', (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
  let adventureId = req.body.adventureId
+ let userId = req.session.user.id
     questions.getQuestionsByAdventure(adventureId)
     // this loads the questions to the user
         .then(data => {
-            return userquestions.createUserQuestions(1,data)
+            return userquestions.createUserQuestions(userId,data)
         })
         // this displays the users adventures
         // .then(console.log)
         .then(data => {
-            return adventure.getAdventuresByUserId(1)})
+            return adventure.getAdventuresByUserId(userId)})
             // need to write a view that takes a list of adventures as an argument and returns html list with add button
         .then(dataArray => {
-             res.send(page(userAdventureList(dataArray)))
+            res.redirect('/profile')
+            //  res.send(page(userAdventureList(dataArray)))
             })
         
         });
-app.post('/test2', (req,res) => {
+app.post('/start', (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
     res.send(page("you have started the adventure"))
