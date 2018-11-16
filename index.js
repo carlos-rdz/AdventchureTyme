@@ -122,6 +122,29 @@ app.get('/profile/:id([0-9]+)', (req,res) => {
         })
 });
 
+app.post('/test', (req,res) => {
+// need to grab user ids from session
+// need to grab adventure ids from submit
+    questions.getQuestionsByAdventure(2)
+    // this loads the questions to the user
+        .then(data => {
+            return userquestions.createUserQuestions(1,data)
+        })
+        // this displays the users adventures
+        // .then(console.log)
+        .then(data => {
+            return adventure.getAdventuresByUserId(1)})
+            // need to write a view that takes a list of adventures as an argument and returns html list with add button
+        .then(dataArray => {
+            dataArray.forEach(name => {
+                console.log(name.name)
+            })
+        })
+        });
+    
+    // 
+
+
 // Browse Adventure
 app.get('/browse', (req, res) => {
     adventure.getAllAdventures()

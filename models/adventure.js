@@ -52,8 +52,17 @@ static getAllAdventures(){
         })
 }
 
+static getAdventuresByUserId(id){
+    return db.any(`select distinct adventures.name from userquestions
+    join questions
+    on questions.id = userquestions.question_id
+    join adventures
+    on adventures.id = questions.adventure_id
+    where user_id = $1
+    `,[id])
+    // .then(console.log)
+}
 
-// add get all
 }
 
 module.exports = Adventure
