@@ -48,7 +48,7 @@ const userAdventureList = require('./views/userAdventureList');
 //----------
     // add signup and login redirects
 app.get('/', (req, res) => {
-    const thePage = page('this will have a signup or login option');
+    const thePage = page('Welcome.  Please login or signup to continue');
     res.send(thePage);
 }); 
 
