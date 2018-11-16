@@ -158,24 +158,13 @@ app.post('/signup', (req, res) => {
 // Profile
 //---------
 // show list of adventures this user has added
-<<<<<<< HEAD
-app.get('/profile/:id([0-9]+)', protectRoute, (req,res) => {
-    users.getUserById(req.params.id)
-        .catch(err => {
-            console.log(err);
-            res.redirect('/login');
-        })
-        .then(theUser => {
-            res.send(theUser);
-=======
 
-app.get('/profile', (req,res) => {
+app.get('/profile',protectRoute, (req,res) => {
     let userId = req.session.user.id
     adventure.getAdventuresByUserId(userId)
         .then(advArray => {
         res.send(page(userAdventureList(advArray)))
 
->>>>>>> master
         })
     // users.getUserById(req.session.user.id)
     //     .catch(err => {
