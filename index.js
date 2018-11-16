@@ -9,6 +9,22 @@ const express = require('express');
 const app = express();
 
 const bodyParser = require('body-parser');
+
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const db = require('./models/db');
+
+app.use(session({
+    store: new pgSession({
+        pgPromise: db
+    }),
+    secret: 'abc123kasfsdbukbfrkqwuehnfioaebgfskdfhgcniw3y4fto7scdghlusdhbv',
+    saveUninitialized: false,
+    cookie: {
+            maxAge: 30 * 24 * 60 * 60 * 1000 
+    }
+}));
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
@@ -19,7 +35,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Configure body-parser to read JSON bodies
 app.use(bodyParser.json());
-
+    
 const page = require('./views/page');
 const loginForm = require('./views/loginForm');
 const signupForm = require('./views/signupForm');
@@ -37,12 +53,32 @@ const userAdventureList = require('./views/userAdventureList');
 //   .then(console.log)
 // userquestions.createUserQuestions(1)
 
-// add protected route function
-// after express sessions is installed**
-
 //========
 // Routes
 //========
+
+// Protected Routes function
+//--------------------------
+// function protectRoute(req, res, next) {
+//     let isLoggedIn = req.session.user ? true : false;
+//     if (isLoggedIn) {
+//         next();
+//     } else {
+//         res.redirect(`/login`);
+//     }
+// }
+// middleware
+// app.use((req, res, next) => {
+
+//     let isLoggedIn = req.session.user ? true : false;
+    
+//     console.log(req.session.user);
+//     console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
+
+//     // We call the next function
+//     next();
+
+// });
 
 // Homepage
 //----------
