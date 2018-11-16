@@ -25,9 +25,6 @@ app.use(session({
     }
 }));
 
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
-
 app.use(express.static('public'));
 
 // Configure body-parser to read data sent by HTML form tags
@@ -197,9 +194,24 @@ app.get('/browse', (req, res) => {
 const message = require('./message');
 // will text message on route, but just a function 
 // can call it anywhere if we pass appropriate params
-app.get('/start', (req,res)=> {
+app.get('/sms', (req,res)=> {
     message("`Welcome to the Adventure! Good Luck!`", '+16789448410', '+17146093784' );
     res.send("message sent");
+});
+
+// twilio incoming
+// incoming message
+const MessagingResponse = require('twilio').twiml.MessagingResponse;
+
+app.post('/sms', (req, res) => {
+  const twiml = new MessagingResponse();
+  let getBody = req.body;
+  console.log(getBody);
+
+  twiml.message('The Robots are coming! Head for the hills!');
+
+  res.writeHead(200, {'Content-Type': 'text/xml'});
+  res.end(twiml.toString());
 });
 
 
