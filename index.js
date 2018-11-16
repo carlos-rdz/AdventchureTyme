@@ -109,7 +109,7 @@ app.post('/login', (req, res) => {
         // Check if password matches - need bcrypt first
         .then(theUser => {
             if (theUser.passwordDoesMatch(thePassword)) {
-                req.param.user = theUser;
+                req.session.user = theUser;
                 res.redirect(`/profile/${theUser.id}`);
             } else {
                 res.redirect('/login');

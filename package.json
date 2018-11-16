@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "reset-db": "dropdb scavengerdb; createdb scavengerdb; psql -f schema.sql scavengerdb; psql -f seed.sql scavengerdb"
+    "reset-db": "dropdb scavengerdb; createdb scavengerdb; psql -f schema.sql scavengerdb; psql -f seed.sql scavengerdb ; psql scavengerdb < node_modules/connect-pg-simple/table.sql"
   },
   "author": "",
   "license": "ISC",
