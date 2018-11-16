@@ -9,6 +9,22 @@ const express = require('express');
 const app = express();
 
 const bodyParser = require('body-parser');
+
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const db = require('./models/db');
+
+app.use(session({
+    store: new pgSession({
+        pgPromise: db
+    }),
+    secret: 'abc123kasfsdbukbfrkqwuehnfioaebgfskdfhgcniw3y4fto7scdghlusdhbv',
+    saveUninitialized: false,
+    cookie: {
+            maxAge: 30 * 24 * 60 * 60 * 1000 
+    }
+}));
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
@@ -19,12 +35,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Configure body-parser to read JSON bodies
 app.use(bodyParser.json());
-
+    
 const page = require('./views/page');
 const loginForm = require('./views/loginForm');
 const signupForm = require('./views/signupForm');
 const adventureList = require('./views/adventureList');
 const showUser = require('./views/showUser');
+const userAdventureList = require('./views/userAdventureList');
 
 
 // questions.getQuestionsByAdventure(2)
@@ -32,18 +49,38 @@ const showUser = require('./views/showUser');
 //   .then(console.log)
 // userquestions.createUserQuestions(1)
 
-// add protected route function
-// after express sessions is installed**
-
 //========
 // Routes
 //========
+
+// Protected Routes function
+//--------------------------
+// function protectRoute(req, res, next) {
+//     let isLoggedIn = req.session.user ? true : false;
+//     if (isLoggedIn) {
+//         next();
+//     } else {
+//         res.redirect(`/login`);
+//     }
+// }
+// middleware
+// app.use((req, res, next) => {
+
+//     let isLoggedIn = req.session.user ? true : false;
+    
+//     console.log(req.session.user);
+//     console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
+
+//     // We call the next function
+//     next();
+
+// });
 
 // Homepage
 //----------
     // add signup and login redirects
 app.get('/', (req, res) => {
-    const thePage = page('this will have a signup or login option');
+    const thePage = page('Welcome.  Please login or signup to continue');
     res.send(thePage);
 }); 
 
@@ -68,7 +105,7 @@ app.post('/login', (req, res) => {
         // Check if password matches - need bcrypt first
         .then(theUser => {
             if (theUser.passwordDoesMatch(thePassword)) {
-                req.param.user = theUser;
+                req.session.user = theUser;
                 res.redirect(`/profile/${theUser.id}`);
             } else {
                 res.redirect('/login');
@@ -116,6 +153,33 @@ app.get('/profile/:id([0-9]+)', (req,res) => {
         .then(theUser => {
             res.send(theUser);
         })
+});
+
+app.post('/test', (req,res) => {
+// need to grab user ids from session
+// need to grab adventure ids from submit
+ let adventureId = req.body.adventureId
+    questions.getQuestionsByAdventure(adventureId)
+    // this loads the questions to the user
+        .then(data => {
+            return userquestions.createUserQuestions(1,data)
+        })
+        // this displays the users adventures
+        // .then(console.log)
+        .then(data => {
+            return adventure.getAdventuresByUserId(1)})
+            // need to write a view that takes a list of adventures as an argument and returns html list with add button
+        .then(dataArray => {
+             res.send(page(userAdventureList(dataArray)))
+            })
+        
+        });
+app.post('/test2', (req,res) => {
+// need to grab user ids from session
+// need to grab adventure ids from submit
+    res.send(page("you have started the adventure"))
+    
+    // 
 });
 
 // Browse Adventure
