@@ -59,26 +59,26 @@ const userAdventureList = require('./views/userAdventureList');
 
 // Protected Routes function
 //--------------------------
-// function protectRoute(req, res, next) {
-//     let isLoggedIn = req.session.user ? true : false;
-//     if (isLoggedIn) {
-//         next();
-//     } else {
-//         res.redirect(`/login`);
-//     }
-// }
+function protectRoute(req, res, next) {
+    let isLoggedIn = req.session.user ? true : false;
+    if (isLoggedIn) {
+        next();
+    } else {
+        res.redirect(`/`);
+    }
+}
 // middleware
-// app.use((req, res, next) => {
+app.use((req, res, next) => {
 
-//     let isLoggedIn = req.session.user ? true : false;
+    let isLoggedIn = req.session.user ? true : false;
     
-//     console.log(req.session.user);
-//     console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
+    console.log(req.session.user);
+    console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
 
-//     // We call the next function
-//     next();
+    // We call the next function
+    next();
 
-// });
+});
 
 // Homepage
 //----------
@@ -115,7 +115,16 @@ app.post('/login', (req, res) => {
                 res.redirect('/login');
             }
         })
-// once sessions is added we will add a logout route
+
+// Logout
+//--------
+app.post(`/logout`, (req, res) => {
+    // kill the session
+    req.session.destroy();
+    // redirect them to homepage
+    res.redirect(`/`);
+
+})
 
 });
 
@@ -141,6 +150,7 @@ app.post('/signup', (req, res) => {
         })
         .then(newUser => {
             // take them to the list of adventures
+            req.session.user = newUser;
             res.redirect('/browse');
         })
 });
@@ -148,7 +158,7 @@ app.post('/signup', (req, res) => {
 // Profile
 //---------
 // show list of adventures this user has added
-app.get('/profile/:id([0-9]+)', (req,res) => {
+app.get('/profile/:id([0-9]+)', protectRoute, (req,res) => {
     users.getUserById(req.params.id)
         .catch(err => {
             console.log(err);
@@ -187,7 +197,7 @@ app.post('/test2', (req,res) => {
 });
 
 // Browse Adventure
-app.get('/browse', (req, res) => {
+app.get('/browse', protectRoute, (req, res) => {
     adventure.getAllAdventures()
         .then(allAdventures => {
             const adventureUL = adventureList(allAdventures);
