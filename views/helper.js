@@ -1,7 +1,7 @@
 function logoutButton(){
 
     return `
-    <div class="text-white>
+    <div class="text-white">
         <form action="/logout" method="POST">
             <input type="submit" value="logout">
         </form>
@@ -19,8 +19,19 @@ function loginOrRegister(){
     `;
 }
 
+function navButtons(){
+    return `
+    <div class="text-white">    
+        <a class="text-white" href ="/profile">My Profile</a>
+        |
+        <a class="text-white" href ="/browse">Browse Adventures</a>
+    </div>
+    `;
+}
+
 module.exports = 
 {
     logoutButton,
-    loginOrRegister
+    loginOrRegister,
+    navButtons
 }
