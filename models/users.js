@@ -24,7 +24,7 @@ class User {
             .then(data => {
                 return new User (data.id, name, phonenumber,username,phash);
             })
-}
+    }
 
 // RETRIEVE
     static getUserByUserName(username){

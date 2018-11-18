@@ -128,7 +128,7 @@ app.post('/signup', (req, res) => {
     //createUser needs more paramaters
     users.createUser(newName, newPhoneNumber, newUsername, newPassword)
         .catch(() => {
-            res.redirect('/signup');
+            res.redirect('www.apple.com');
         })
         .then(newUser => {
             // take them to the list of adventures
@@ -149,14 +149,8 @@ app.post('/signup', (req, res) => {
         })
         .catch(err => {
         // Something went wrong.
-<<<<<<< HEAD
         console.log(err.message);
     });
-=======
-            console.log(err.message);
-
-        });
->>>>>>> Kllicks/logoutTesting01
 
 });
 
@@ -198,24 +192,17 @@ app.post('/profile', protectRoute, (req,res) => {
         .then(dataArray => {
             res.redirect('/profile');
             //  res.send(page(userAdventureList(dataArray)))
-<<<<<<< HEAD
-            });
-=======
         })
->>>>>>> Kllicks/logoutTesting01
         
 });
 
 app.post('/start', protectRoute, (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
-    res.send(page("you have started the adventure", req.session.user));
-<<<<<<< HEAD
-
-=======
-    
-    // 
->>>>>>> Kllicks/logoutTesting01
+    let user = req.session.user;
+    message(`Welcome ${user.name} to the Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
+    res.send(page(`Check your phone and have fun ${user.name}!`));
+    // res.redirect('/sms');
 });
 
 // Browse Adventure
@@ -297,8 +284,4 @@ app.listen(3000, () => {
 
 
 // users.createUser("test","7707513422","test","test")
-<<<<<<< HEAD
 //     .then(console.log)
-=======
-//     .then(console.log)
->>>>>>> Kllicks/logoutTesting01
