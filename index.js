@@ -7,7 +7,6 @@ const userquestions = require('./models/userquestions');
 // have i been pwned??
 const hibp = require('hibp');
 
-
 const express = require('express');
 const app = express();
 
@@ -29,10 +28,8 @@ app.use(session({
 }));
 
 app.use(express.static('public'));
-
 // Configure body-parser to read data sent by HTML form tags
 app.use(bodyParser.urlencoded({ extended: false }));
-
 // Configure body-parser to read JSON bodies
 app.use(bodyParser.json());
     
@@ -43,11 +40,6 @@ const adventureList = require('./views/adventureList');
 const showUser = require('./views/showUser');
 const userAdventureList = require('./views/userAdventureList');
 
-
-// questions.getQuestionsByAdventure(2)
-//   .then(data => userquestions.createUserQuestions(1,data))
-//   .then(console.log)
-// userquestions.createUserQuestions(1)
 
 //========
 // Routes
@@ -65,15 +57,12 @@ function protectRoute(req, res, next) {
 };
 // middleware
 app.use((req, res, next) => {
-
     let isLoggedIn = req.session.user ? true : false;
     
     console.log(req.session.user);
     console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
-
     // We call the next function
     next();
-
 });
 
 // Homepage
@@ -110,9 +99,8 @@ app.post('/login', (req, res) => {
             } else {
                 res.redirect('/login');
             }
-        })
-});
-
+        });
+    });
 // Logout
 //--------
 app.post(`/logout`, (req, res) => {
@@ -120,7 +108,6 @@ app.post(`/logout`, (req, res) => {
     req.session.destroy();
     // redirect them to homepage
     res.redirect(`/`);
-
 });
 
 // Signup
@@ -133,7 +120,7 @@ app.get('/signup', (req, res) => {
 
 app.post('/signup', (req, res) => {
     const newName = req.body.name;
-    const newPhoneNumber = req.body.phoneNumber;
+    const newPhoneNumber = req.body.phonenumber;
     const newUsername = req.body.username;
     const newPassword = req.body.password;
 
@@ -147,40 +134,35 @@ app.post('/signup', (req, res) => {
             // take them to the list of adventures
             req.session.user = newUser;
             res.redirect('/browse');
-        })
+        });
     // have i been pwned???????????????????????????
-    hibp
-        .search(`${newUsername}`)
-        .then(data => {
-        if (data.breaches || data.pastes) {
-        // Bummer...
-        console.log(data);
-        } else {
-        // Phew! We're clear.
-        console.log(`Good news — no pwnage found on username ${newUsername}!`);
-        }
-    })
+        hibp
+            .search(`${newUsername}`)
+            .then(data => {
+                if (data.breaches || data.pastes) {
+                    // Bummer...
+                    console.log(data);
+                } else {
+                    // Phew! We're clear.
+                    console.log(`Good news — no pwnage found on username ${newUsername}!`);
+                }
+        })
         .catch(err => {
         // Something went wrong.
         console.log(err.message);
-
-
-  });
-
+    });
 
 });
 
 // Profile
 //---------
 // show list of adventures this user has added
-
 app.get('/profile',protectRoute, (req,res) => {
     let userId = req.session.user.id
     adventure.getAdventuresByUserId(userId)
         .then(advArray => {
-        res.send(page(userAdventureList(advArray),req.session.user))
-
-        })
+        res.send(page(userAdventureList(advArray),req.session.user));
+        });
     // users.getUserById(req.session.user.id)
     //     .catch(err => {
     //         console.log(err);
@@ -194,8 +176,8 @@ app.get('/profile',protectRoute, (req,res) => {
 app.post('/profile', protectRoute, (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
- let adventureId = req.body.adventureId;
- let userId = req.session.user.id;
+    let adventureId = req.body.adventureId;
+    let userId = req.session.user.id;
     questions.getQuestionsByAdventure(adventureId)
     // this loads the questions to the user
         .then(data => {
@@ -204,20 +186,20 @@ app.post('/profile', protectRoute, (req,res) => {
         // this displays the users adventures
         // .then(console.log)
         .then(data => {
-            return adventure.getAdventuresByUserId(userId)})
+            return adventure.getAdventuresByUserId(userId)
+        })
             // need to write a view that takes a list of adventures as an argument and returns html list with add button
         .then(dataArray => {
-            res.redirect('/profile')
+            res.redirect('/profile');
             //  res.send(page(userAdventureList(dataArray)))
-            })
+            });
         
         });
 app.post('/start', (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
-    res.send(page("you have started the adventure", req.session.user))
-    
-    // 
+    res.send(page("you have started the adventure", req.session.user));
+
 });
 
 // Browse Adventure
@@ -227,7 +209,7 @@ app.get('/browse', protectRoute, (req, res) => {
             const adventureUL = adventureList(allAdventures);
             const thePage = page(adventureUL, req.session.user);
             res.send(thePage);
-        })
+        });
 });
 
 // twilio test
@@ -236,7 +218,8 @@ const message = require('./scripts/message');
 // will text message on route, but just a function 
 // can call it anywhere if we pass appropriate params
 app.get('/sms', (req,res)=> {
-    message("`Welcome to the Adventure! Good Luck!`", '+16789448410', '+17146093784' );
+    let user = req.session.user;
+    message(`Welcome ${user.name} to the Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
     res.send("message sent");
 });
 
@@ -265,9 +248,10 @@ app.post('/sms', (req, res) => {
                 console.log(err ? err : 'done!')
                 let localAddress = './images/user_submit.jpg'
                 visionOCR(localAddress)
-                // .then(results => {
-                //     twiml.message('The Robots are coming! Head for the hills!');
-                // })
+                .then(results => {
+                    text
+                    twiml.message('The Robots are coming! Head for the hills!');
+                })
             });
         });
     })
@@ -277,11 +261,18 @@ app.post('/sms', (req, res) => {
 });
 
 // twilio hosts mms images on S3 and the MediaUrl has to be resolved before 
-// I can actually use the address to 
+// I can actually use the address to write an img file locally
 function resolveURL(address, callback){
     console.log("entered resolve url");
-    https.get(address,(response) => callback(response.responseUrl))     
-}
+    https.get(address,(response) => callback(response.responseUrl));     
+};
+
+// function validateText(textArr, correctAnswer){
+//     // recieve an arrar of objects
+//     for(let i = 0; i < textArr.length; i++){
+//         if (textArr[i].description === '')
+//     }
+// }
 
 app.listen(3000, () => {
     console.log('your express app is readddddy')

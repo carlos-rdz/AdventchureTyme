@@ -13,7 +13,7 @@ values
 insert into questions
 (question, answer, ord, adventure_id)
 values
-('what month is it','november',1,1),
+('this is a terrible joke. find me','javascript',1,1),
 ('what month is it','december',2,1),
 ('what month is it','january',3,1),
 ('what month is it','february',1,2),
