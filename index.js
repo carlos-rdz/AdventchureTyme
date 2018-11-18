@@ -212,7 +212,7 @@ app.get('/browse', protectRoute, (req, res) => {
         });
 });
 
-// twilio test
+// Twilio integration
 const {https} = require('follow-redirects');
 const message = require('./scripts/message');
 // will text message on route, but just a function 
@@ -223,7 +223,8 @@ app.get('/sms', (req,res)=> {
     res.send("message sent");
 });
 
-// twilio incoming
+// Twilio incoming
+
 // incoming message
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const visionOCR = require('./scripts/visionOCR');
@@ -260,7 +261,7 @@ app.post('/sms', (req, res) => {
   res.end(twiml.toString());
 });
 
-// twilio hosts mms images on S3 and the MediaUrl has to be resolved before 
+// Twilio hosts mms images on S3servers and the MediaUrl has to be resolved before 
 // I can actually use the address to write an img file locally
 function resolveURL(address, callback){
     console.log("entered resolve url");
