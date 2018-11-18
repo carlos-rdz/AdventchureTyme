@@ -140,7 +140,7 @@ app.get('/signup', (req, res) => {
 
 app.post('/signup', (req, res) => {
     const newName = req.body.name;
-    const newPhoneNumber = req.body.phoneNumber;
+    const newPhoneNumber = req.body.phonenumber;
     const newUsername = req.body.username;
     const newPassword = req.body.password;
 
