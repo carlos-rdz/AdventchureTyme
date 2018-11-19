@@ -1,4 +1,4 @@
-const {logoutButton, loginOrRegister} = require('./helper');
+const {logoutButton, loginOrRegister, navButtons} = require('./helper');
 
 function page(content,isLoggedIn=false){
     return `<!doctype html>
@@ -19,9 +19,11 @@ function page(content,isLoggedIn=false){
       <img src="./images/adventure.jpg">
       </div>
         <div class="p-3 mb-2 bg-secondary text-white">
+          ${navButtons()}
           ${
             isLoggedIn ? logoutButton() : loginOrRegister()
           }
+          
         </div>
         <div class="p-3 mb-2 bg-light text-dark">
           ${content}
