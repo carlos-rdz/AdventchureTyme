@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "debug": "node --inspect-brk index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "reset-db": "dropdb scavengerdb; createdb scavengerdb; psql -f schema.sql scavengerdb; psql -f seed.sql scavengerdb ; psql scavengerdb < node_modules/connect-pg-simple/table.sql"
   },

@@ -12,7 +12,7 @@ function signupForm(){
     </div>
      <div class="row">
     <label class="col-sm"> Phone Number </label>
-        <input class="col-sm" type="tel" name="phonenumber" >
+        <input class="col-sm" type="text" name="phonenumber" >
         </div>
         <div class="row">
     <label class="col-sm"> Username </label>

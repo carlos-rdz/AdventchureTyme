@@ -246,36 +246,58 @@ const visionOCR = require('./scripts/visionOCR');
 
 app.post('/sms', (req, res) => {
   const twiml = new MessagingResponse();
-  let getBody = req.body;
-  console.log(getBody);
+//   let getBody = req.body;
+//   console.log(getBody);
   let twilioUrl = req.body.MediaUrl0;
-    resolveURL(twilioUrl, (remoteAddress) => {
+  let userPhone = req.body.From;
+//   console.log(userPhone);
+  users.getUserByPhonenumber(userPhone)
+//   .then(console.log);
+    .then(user => {
+    // retrieveAnswer(user.id);
+    return userquestions.getMostRecentUserQuestion(user.id)
+    })
+    .then(userQuestionObj => {
+        return Promise.all([questions.getQuestionsByQuestion_Id(userQuestionObj.question_id), userQuestionObj]) 
+    })
+    .then(dataArr => {
+        // dataArr[0] = questionObj
+        // dataArr[1] = userQuestionObj
+        return Promise.all([dataArr[0].answer, dataArr[1]])
+    })
+    .then(dataArr => {
+        resolveURL(twilioUrl, (remoteAddress) => {
+
         // console.log(remoteAddress);
 //   save image to temp storage
         const fs = require('fs');
         const imageDownload = require('image-download');
         const imageType = require('image-type');
         
-        imageDownload(`${remoteAddress}`).then(buffer => {
+        imageDownload(`${remoteAddress}`)
+        .then(buffer => {
             const type = imageType(buffer);
         
             fs.writeFile('./images/user_submit.' + type.ext, buffer, (err) => { 
                 console.log(err ? err : 'done!')
-                let localAddress = './images/user_submit.jpg'
-                visionOCR(localAddress)
-                .then(results => {
-                // validate results
-                // if true
-                    // insert completed=true into db
-                    // question updates
-                    twiml.message('The Robots are coming! Head for the hills!');
-                })
-            });
-        });
+            })
+        })
     })
-  
-  res.writeHead(200, {'Content-Type': 'text/xml'});
-  res.end(twiml.toString());
+    return dataArr;
+})
+.then(dataArr => {
+   return Promise.all([visionOCR(), dataArr[0], dataArr[1]])
+})
+.then(dataArr => {
+    // [userText, answerText, userQuestionObj]
+    return validateText(dataArr[0],dataArr[1],dataArr[2]) 
+})
+.then(userQuestionObj => {
+    issueNextQuestion(userQuestionObj)   
+})
+    
+    res.writeHead(200, {'Content-Type': 'text/xml'});
+    res.end(twiml.toString());
 });
 
 // Twilio hosts mms images on S3servers and the MediaUrl has to be resolved before 
@@ -283,21 +305,40 @@ app.post('/sms', (req, res) => {
 function resolveURL(address, callback){
     console.log("entered resolve url");
     https.get(address,(response) => callback(response.responseUrl));     
+
 };
 
-// function validateText(textArr, correctAnswer){
-//     // recieve an arrar of objects
-//     for(let i = 0; i < textArr.length; i++){
-//         if (textArr[i].description === '')
+function validateText(userAnswer, correctAnswer, userQuestionObj){
+    console.table(userQuestionObj)
+    let answer = userAnswer.toLowerCase();
+    if (answer.includes(correctAnswer)){
+        userQuestionObj.updateCompleted('true') 
+        return userQuestionObj;
+    }
+}
+
+// function retrieveAnswer(userID){
+//     // same process to get answer as a question. Just return the answer instead
+//     userquestions.getMostRecentUserQuestion(userID)
+//         .then(data => {
+//             return questions.getQuestionsByQuestion_Id(data.question_id) 
+//         })
+//         // .then(questionObj => {
+//         //     return questionObj.answer;
+//         // })
+         
 //     }
-// }
+
 function issueNextQuestion(user){
-    userquestions.getMostRecentUserQuestion(user.id)
+    userquestions.getMostRecentUserQuestion(user.user_id)
         .then(data => {
             return questions.getQuestionsByQuestion_Id(data.question_id) 
         })
         .then(data => {
-            message(`${data.question}`, `+16789448410`, `+1`+`${user.phonenumber}` );
+            return Promise.all([data, users.getUserById(user.user_id)])
+        })
+        .then(dataArr => {
+            message(`${dataArr[0].question}`, `+16789448410`, `${dataArr[1].phonenumber}` );
         });
     }
 
