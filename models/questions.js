@@ -33,6 +33,22 @@ static getQuestionsByAdventure(adventure_id){
             return questionArray
         })
 }
+
+static getQuestionsByQuestion_Id(question_id){
+    return db.one('select * from questions where id=$1',[question_id])
+        .then(data => {
+            return new Question (data.id,data.question,data.answer,data.ord,data.adventure_id)
+        })
+}
+
+// get question by question id
+
+
+
+
+
+
+
     
 // UPDATE
 
