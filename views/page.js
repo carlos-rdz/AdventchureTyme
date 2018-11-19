@@ -1,4 +1,4 @@
-const {logoutButton, loginOrRegister, navButtons} = require('./helper');
+const {logoutButton, loginOrRegister} = require('./helper');
 
 function page(content,isLoggedIn=false){
     return `<!doctype html>
@@ -17,7 +17,6 @@ function page(content,isLoggedIn=false){
       <body >
      
         <div class="p-3 mb-2 bg-secondary text-white">
-          ${navButtons()}
           ${
             isLoggedIn ? logoutButton() : loginOrRegister()
           }

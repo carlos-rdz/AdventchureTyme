@@ -216,7 +216,7 @@ app.post('/start', protectRoute, (req,res) => {
 
     console.log(adventure)
     message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
-    res.send(page(`Check your phone and have fun ${user.name}!`));
+    res.send(page(`Check your phone and have fun ${user.name}!`, req.session.user));
     
     
     // res.redirect('/sms');

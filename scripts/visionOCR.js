@@ -18,7 +18,7 @@ const client = new vision.ImageAnnotatorClient();
 /**
  * TODO(developer): Uncomment the following line before running the sample.
  */
-//  const imgAddress = './images/IMG_6773.jpg';
+// const imgAddress = './images/IMG_8855.jpg';
 
 // Performs text detection on the local file
 function extractText(imgAddress){
@@ -27,7 +27,7 @@ function extractText(imgAddress){
   .then(results => {
     const detections = results[0].textAnnotations;
     console.log('Text:');
-    // detections.forEach(text => console.log(text));
+    detections.forEach(text => console.log(text));
     return detections;
   })
   .catch(err => {
@@ -61,7 +61,7 @@ function extractText(imgAddress){
 //   });
 // }
 
-
+// extractText(imgAddress);
 
 
 
