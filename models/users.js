@@ -13,6 +13,7 @@ class User {
     }
 // CREATE
     static createUser(name,phonenumber,username,password){
+        console.log(`phone ${phonenumber}`);
         const salt = bcrypt.genSaltSync(saltRounds)
         const phash = bcrypt.hashSync(password,salt)
         return db.one(`insert into users
@@ -23,7 +24,7 @@ class User {
             .then(data => {
                 return new User (data.id, name, phonenumber,username,phash);
             })
-}
+    }
 
 // RETRIEVE
     static getUserByUserName(username){

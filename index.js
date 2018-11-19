@@ -7,7 +7,6 @@ const userquestions = require('./models/userquestions');
 // have i been pwned??
 const hibp = require('hibp');
 
-
 const express = require('express');
 const app = express();
 
@@ -28,14 +27,9 @@ app.use(session({
     }
 }));
 
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
-
 app.use(express.static('public'));
-
 // Configure body-parser to read data sent by HTML form tags
 app.use(bodyParser.urlencoded({ extended: false }));
-
 // Configure body-parser to read JSON bodies
 app.use(bodyParser.json());
     
@@ -46,15 +40,6 @@ const adventureList = require('./views/adventureList');
 const showUser = require('./views/showUser');
 const userAdventureList = require('./views/userAdventureList');
 
-//   let test = cloudinary.v2.uploader.upload("./images/stonemtn.jpeg", {phash:true},
-//   function(error, result) {console.log(result, error)})
-//     .then(console.log(test.phash));
-
-
-// questions.getQuestionsByAdventure(2)
-//   .then(data => userquestions.createUserQuestions(1,data))
-//   .then(console.log)
-// userquestions.createUserQuestions(1)
 
 //========
 // Routes
@@ -73,15 +58,12 @@ function protectRoute(req, res, next) {
 
 // middleware
 app.use((req, res, next) => {
-
     let isLoggedIn = req.session.user ? true : false;
     
     console.log(req.session.user);
     console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
-
     // We call the next function
     next();
-
 });
 
 // Homepage
@@ -117,9 +99,8 @@ app.post('/login', (req, res) => {
             } else {
                 res.redirect('/login');
             }
-        })
-});
-
+        });
+    });
 // Logout
 //--------
 app.post(`/logout`, (req, res) => {
@@ -139,7 +120,7 @@ app.get('/signup', (req, res) => {
 
 app.post('/signup', (req, res) => {
     const newName = req.body.name;
-    const newPhoneNumber = req.body.phoneNumber;
+    const newPhoneNumber = req.body.phonenumber;
     const newUsername = req.body.username;
     const newPassword = req.body.password;
 
@@ -147,44 +128,41 @@ app.post('/signup', (req, res) => {
     //createUser needs more paramaters
     users.createUser(newName, newPhoneNumber, newUsername, newPassword)
         .catch(() => {
-            res.redirect('/signup');
+            res.redirect('www.apple.com');
         })
         .then(newUser => {
             // take them to the list of adventures
             req.session.user = newUser;
             res.redirect('/browse');
-        })
+        });
     // have i been pwned???????????????????????????
-    hibp
-        .search(`${newUsername}`)
-        .then(data => {
-        if (data.breaches || data.pastes) {
-        // Bummer...
-        console.log(data);
-        } else {
-        // Phew! We're clear.
-        console.log(`Good news — no pwnage found on username ${newUsername}!`);
-        }
-    })
+        hibp
+            .search(`${newUsername}`)
+            .then(data => {
+                if (data.breaches || data.pastes) {
+                    // Bummer...
+                    console.log(data);
+                } else {
+                    // Phew! We're clear.
+                    console.log(`Good news — no pwnage found on username ${newUsername}!`);
+                }
+        })
         .catch(err => {
         // Something went wrong.
-            console.log(err.message);
-
-        });
+        console.log(err.message);
+    });
 
 });
 
 // Profile
 //---------
 // show list of adventures this user has added
-
 app.get('/profile',protectRoute, (req,res) => {
     let userId = req.session.user.id
     adventure.getAdventuresByUserId(userId)
         .then(advArray => {
-        res.send(page(userAdventureList(advArray),req.session.user))
-
-        })
+        res.send(page(userAdventureList(advArray),req.session.user));
+        });
     // users.getUserById(req.session.user.id)
     //     .catch(err => {
     //         console.log(err);
@@ -212,7 +190,7 @@ app.post('/profile', protectRoute, (req,res) => {
         })
             // need to write a view that takes a list of adventures as an argument and returns html list with add button
         .then(dataArray => {
-            res.redirect('/profile')
+            res.redirect('/profile');
             //  res.send(page(userAdventureList(dataArray)))
         })
         
@@ -221,9 +199,10 @@ app.post('/profile', protectRoute, (req,res) => {
 app.post('/start', protectRoute, (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
-    res.send(page("you have started the adventure", req.session.user));
-    
-    // 
+    let user = req.session.user;
+    message(`Welcome ${user.name} to the Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
+    res.send(page(`Check your phone and have fun ${user.name}!`));
+    // res.redirect('/sms');
 });
 
 // Browse Adventure
@@ -233,8 +212,71 @@ app.get('/browse', protectRoute, (req, res) => {
             const adventureUL = adventureList(allAdventures);
             const thePage = page(adventureUL, req.session.user);
             res.send(thePage);
-        })
+        });
 });
+
+// Twilio integration
+const {https} = require('follow-redirects');
+const message = require('./scripts/message');
+// will text message on route, but just a function 
+// can call it anywhere if we pass appropriate params
+app.get('/sms', (req,res)=> {
+    let user = req.session.user;
+    message(`Welcome ${user.name} to the Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
+    res.send("message sent");
+});
+
+// Twilio incoming
+
+// incoming message
+const MessagingResponse = require('twilio').twiml.MessagingResponse;
+const visionOCR = require('./scripts/visionOCR');
+
+
+app.post('/sms', (req, res) => {
+  const twiml = new MessagingResponse();
+  let getBody = req.body;
+  console.log(getBody);
+  let twilioUrl = req.body.MediaUrl0;
+    resolveURL(twilioUrl, (remoteAddress) => {
+        // console.log(remoteAddress);
+//   save image to temp storage
+        const fs = require('fs');
+        const imageDownload = require('image-download');
+        const imageType = require('image-type');
+        
+        imageDownload(`${remoteAddress}`).then(buffer => {
+            const type = imageType(buffer);
+        
+            fs.writeFile('./images/user_submit.' + type.ext, buffer, (err) => { 
+                console.log(err ? err : 'done!')
+                let localAddress = './images/user_submit.jpg'
+                visionOCR(localAddress)
+                .then(results => {
+                    text
+                    twiml.message('The Robots are coming! Head for the hills!');
+                })
+            });
+        });
+    })
+  
+  res.writeHead(200, {'Content-Type': 'text/xml'});
+  res.end(twiml.toString());
+});
+
+// Twilio hosts mms images on S3servers and the MediaUrl has to be resolved before 
+// I can actually use the address to write an img file locally
+function resolveURL(address, callback){
+    console.log("entered resolve url");
+    https.get(address,(response) => callback(response.responseUrl));     
+};
+
+// function validateText(textArr, correctAnswer){
+//     // recieve an arrar of objects
+//     for(let i = 0; i < textArr.length; i++){
+//         if (textArr[i].description === '')
+//     }
+// }
 
 app.listen(3000, () => {
     console.log('your express app is readddddy')
