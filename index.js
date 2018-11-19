@@ -16,6 +16,18 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const db = require('./models/db');
 
+// questions.getQuestionsByQuestion_Id(1)
+//     .then(console.log)
+// userquestions.getMostRecentUserQuestion(4)
+    // .then(data => {
+    //     return data.updateResponse("this is an answer")
+    // })
+    // .then(data => {
+    // return data.updateCompleted("true")}
+    // )
+    // .then(console.log)
+
+
 app.use(session({
     store: new pgSession({
         pgPromise: db
@@ -197,12 +209,11 @@ app.post('/profile', protectRoute, (req,res) => {
 });
 
 app.post('/start', protectRoute, (req,res) => {
-// need to grab user ids from session
-// need to grab adventure ids from submit
     let user = req.session.user;
-    message(`Welcome ${user.name} to the Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
+    let adventure = req.body.adventureObject;
+    message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
+    issueNextQuestion(user);
     res.send(page(`Check your phone and have fun ${user.name}!`));
-    // res.redirect('/sms');
 });
 
 // Browse Adventure
@@ -253,7 +264,10 @@ app.post('/sms', (req, res) => {
                 let localAddress = './images/user_submit.jpg'
                 visionOCR(localAddress)
                 .then(results => {
-                    text
+                // validate results
+                // if true
+                    // insert completed=true into db
+                    // question updates
                     twiml.message('The Robots are coming! Head for the hills!');
                 })
             });
@@ -277,6 +291,15 @@ function resolveURL(address, callback){
 //         if (textArr[i].description === '')
 //     }
 // }
+function issueNextQuestion(user){
+    userquestions.getMostRecentUserQuestion(user.id)
+        .then(data => {
+            return questions.getQuestionsByQuestion_Id(data.question_id) 
+        })
+        .then(data => {
+            message(`${data.question}`, `+16789448410`, `+1`+`${user.phonenumber}` );
+        });
+    }
 
 app.listen(3000, () => {
     console.log('your express app is readddddy')
