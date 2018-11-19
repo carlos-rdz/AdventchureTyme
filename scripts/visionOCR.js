@@ -18,7 +18,7 @@ const client = new vision.ImageAnnotatorClient();
 /**
  * TODO(developer): Uncomment the following line before running the sample.
  */
-// const imgAddress = './images/IMG_7882.jpg';
+// const imgAddress = './images/IMG_8855.jpg';
 
 // Performs text detection on the local file
 function extractText(imgAddress){
