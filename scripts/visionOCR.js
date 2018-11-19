@@ -4,6 +4,9 @@ const vision = require('@google-cloud/vision');
 // This shell cmd maps where the authentication json is stored. Will the json file need to go on the server then?
 // export GOOGLE_APPLICATION_CREDENTIALS="/Users/mblatchford/Digital Crafts/DigitalCrafts-ScavengerHunt-b7df5a3616de.json"
 
+// This shell cmd maps where the authentication json is stored. Will the json file need to go on the server then?
+// export GOOGLE_APPLICATION_CREDENTIALS="/Users/carlosrodriguez/DigitalCrafts/Scavenger/DigitalCrafts-ScavengerHunt-b7df5a3616de.json"
+
 
 // // upload an image to bucket
 // gsutil cp './images/IMG_6780.jpg' gs://'scavenger_hunt_images'

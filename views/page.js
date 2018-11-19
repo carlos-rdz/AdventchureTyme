@@ -15,9 +15,7 @@ function page(content,isLoggedIn=false){
       </head>
 
       <body >
-      <div>
-      <img src="./images/adventure.jpg">
-      </div>
+     
         <div class="p-3 mb-2 bg-secondary text-white">
           ${navButtons()}
           ${

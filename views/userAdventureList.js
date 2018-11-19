@@ -6,8 +6,11 @@ function adventureToItem(adventureObject){
     </div>
     <form action="/start" method="POST">
     <input type="submit" value="Start!">
+    <input type="hidden" name="adventureObject" value=${adventureObject.id}>
     </form>
     </div>
+
+  
     `
 
     // can i send the adventure id here???

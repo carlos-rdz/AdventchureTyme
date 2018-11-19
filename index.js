@@ -16,6 +16,18 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const db = require('./models/db');
 
+questions.getQuestionsByQuestion_Id(1)
+    .then(console.log)
+// userquestions.getMostRecentUserQuestion(4)
+    // .then(data => {
+    //     return data.updateResponse("this is an answer")
+    // })
+    // .then(data => {
+    // return data.updateCompleted("true")}
+    // )
+    // .then(console.log)
+
+
 app.use(session({
     store: new pgSession({
         pgPromise: db
@@ -200,8 +212,13 @@ app.post('/start', protectRoute, (req,res) => {
 // need to grab user ids from session
 // need to grab adventure ids from submit
     let user = req.session.user;
-    message(`Welcome ${user.name} to the Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
+    let adventure = req.body.adventureObject
+
+    console.log(adventure)
+    message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
     res.send(page(`Check your phone and have fun ${user.name}!`));
+    
+    
     // res.redirect('/sms');
 });
 
