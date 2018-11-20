@@ -5,7 +5,7 @@ const adventure = require('./models/adventure');
 const questions = require('./models/questions');
 const userquestions = require('./models/userquestions');
 // have i been pwned??
-const hibp = require('hibp');
+// const hibp = require('hibp');
 
 const express = require('express');
 const app = express();
@@ -15,18 +15,6 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const db = require('./models/db');
-
-// questions.getQuestionsByQuestion_Id(1)
-//     .then(console.log)
-// userquestions.getMostRecentUserQuestion(4)
-    // .then(data => {
-    //     return data.updateResponse("this is an answer")
-    // })
-    // .then(data => {
-    // return data.updateCompleted("true")}
-    // )
-    // .then(console.log)
-
 
 app.use(session({
     store: new pgSession({
@@ -148,21 +136,21 @@ app.post('/signup', (req, res) => {
             res.redirect('/browse');
         });
     // have i been pwned???????????????????????????
-        hibp
-            .search(`${newUsername}`)
-            .then(data => {
-                if (data.breaches || data.pastes) {
-                    // Bummer...
-                    console.log(data);
-                } else {
-                    // Phew! We're clear.
-                    console.log(`Good news — no pwnage found on username ${newUsername}!`);
-                }
-        })
-        .catch(err => {
-        // Something went wrong.
-        console.log(err.message);
-    });
+    //     hibp
+    //         .search(`${newUsername}`)
+    //         .then(data => {
+    //             if (data.breaches || data.pastes) {
+    //                 // Bummer...
+    //                 console.log(data);
+    //             } else {
+    //                 // Phew! We're clear.
+    //                 console.log(`Good news — no pwnage found on username ${newUsername}!`);
+    //             }
+    //     })
+    //     .catch(err => {
+    //     // Something went wrong.
+    //     console.log(err.message);
+    // });
 
 });
 
@@ -175,14 +163,6 @@ app.get('/profile',protectRoute, (req,res) => {
         .then(advArray => {
         res.send(page(userAdventureList(advArray),req.session.user));
         });
-    // users.getUserById(req.session.user.id)
-    //     .catch(err => {
-    //         console.log(err);
-    //         res.redirect('/login');
-    //     })
-    //     .then(theUser => {
-    //         res.send(theUser);
-    //     })
 });
 
 app.post('/profile', protectRoute, (req,res) => {
@@ -212,7 +192,6 @@ app.post('/start', protectRoute, (req,res) => {
     let user = req.session.user;
     console.log(user);
     let adventure = req.body.adventureObject;
-    //  message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
      message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `${user.phonenumber}` );
      issueFirstQuestion(user.id);
     res.send(page(`Check your phone and have fun ${user.name}!`));
@@ -231,35 +210,19 @@ app.get('/browse', protectRoute, (req, res) => {
 // Twilio integration
 const {https} = require('follow-redirects');
 const message = require('./scripts/message');
-// will text message on route, but just a function 
-// can call it anywhere if we pass appropriate params
-app.get('/sms', (req,res)=> {
-    let user = req.session.user;
-    message(`Welcome ${user.name} to the Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
-    res.send("message sent");
-});
 
 // Twilio incoming
-
 // incoming message
-const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const visionOCR = require('./scripts/visionOCR');
 
 
 app.post('/sms', (req, res) => {
     console.log("got an sms from twilio");
-//   const twiml = new MessagingResponse();
-
-//   let getBody = req.body;
-//   console.log(getBody);
-  let twilioUrl = req.body.MediaUrl0;
-  let userPhone = req.body.From;
-//   console.log(userPhone);
-  users.getUserByPhonenumber(userPhone)
-//   .then(console.log);
+    let twilioUrl = req.body.MediaUrl0;
+    let userPhone = req.body.From;
+    users.getUserByPhonenumber(userPhone)
     .then(user => {
-    // retrieveAnswer(user.id);
-    return userquestions.getMostRecentUserQuestion(user.id)
+        return userquestions.getMostRecentUserQuestion(user.id)
     })
     .then(userQuestionObj => {
         return Promise.all([questions.getQuestionsByQuestion_Id(userQuestionObj.question_id), userQuestionObj]) 
@@ -272,9 +235,7 @@ app.post('/sms', (req, res) => {
     .then(dataArr => {
        return resolveURL(twilioUrl)
         .then((remoteAddress) => {
-
-            // console.log(remoteAddress);
-    //   save image to temp storage
+    //   save image locally
             const fs = require('fs');
             const imageDownload = require('image-download');
             const imageType = require('image-type');
@@ -295,30 +256,19 @@ app.post('/sms', (req, res) => {
                 }))
             })
         })
-    // return dataArr;
-
 })
 .then(dataArr => {
-    // console.table(dataArr);
    return Promise.all([visionOCR(), dataArr[0], dataArr[1]])
 })
 .then(dataArr => {
-    console.table(dataArr);
-
-    // [userText, answerText, userQuestionObj]
+    // [userAnswer, correctAnswer, userQuestionObj]
     return validateText(dataArr[0],dataArr[1],dataArr[2]) 
-
-    
 })
 .then(userQuestionObj => {
-    // console.log("I got triggered");
-    // console.table(`userquestionobj ${userQuestionObj}`);
     issueNextQuestion(userQuestionObj)   
 
 })
-    
-    // res.writeHead(200, {'Content-Type': 'text/xml'});
-    // res.end(twiml.toString());
+ 
 });
 
 // Twilio hosts mms images on S3servers and the MediaUrl has to be resolved before 
@@ -339,39 +289,38 @@ function resolveURL(address){
 };
 
 function validateText(userAnswer, correctAnswer, userQuestionObj){
-    console.table(userQuestionObj)
+    // console.table(userQuestionObj)
     // toLowerCase ensures case independent string comparison 
     const userAnswerStr = userAnswer.toLowerCase();
     const correctAnswerStr = correctAnswer.toLowerCase();
-    console.log(userAnswerStr);
-    console.log(correctAnswerStr);
+    // console.log(userAnswerStr);
+    // console.log(correctAnswerStr);
     if (userAnswerStr.includes(correctAnswerStr)){
-        console.table(`userquestionobj ${userQuestionObj}`);
+        console.log("Img compare flagged as true");
+        // console.table(`userquestionobj ${userQuestionObj}`);
         return userQuestionObj.updateCompleted('true')
         .then(()=> userQuestionObj) 
     }else{
+        //answer not found
         console.log("This flagged as false");
         return userQuestionObj.updateCompleted() 
         .then(()=> userQuestionObj) 
-
-        //answer not found
-    //     message('That image doesn\'t seem correct. Please try again making sure your picture is squarely-facing your signage and where possible, try including just the sign text you\'re trying to submit.','+16789448410', `${userQuestionObj.phonenumber}` );
     }
-    // return userQuestionObj;
-
 }
 
-// function retrieveAnswer(userID){
-//     // same process to get answer as a question. Just return the answer instead
-//     userquestions.getMostRecentUserQuestion(userID)
-//         .then(data => {
-//             return questions.getQuestionsByQuestion_Id(data.question_id) 
+//     }else{
+//         console.log("Img compare flagged as false");
+//         return userQuestionObj.updateCompleted() 
+//         .then(userQuestionObj => {
+//          //answer not found
+//          return users.getUserById(userQuestionObj.user_id)
+//          .then(userObj => {
+//             message('That image doesn\'t seem correct. Please try again making sure your picture is squarely-facing your signage and where possible, try including just the sign text you\'re trying to submit.','+16789448410', `${userObj.phonenumber}` );
+//             })
 //         })
-//         // .then(questionObj => {
-//         //     return questionObj.answer;
-//         // })
-         
 //     }
+// }
+
 
 function issueFirstQuestion(userID){
     userquestions.getMostRecentUserQuestion(userID)
@@ -404,6 +353,3 @@ app.listen(3000, () => {
     console.log('your express app is readddddy')
 });
 
-
-// users.createUser("test","7707513422","test","test")
-//     .then(console.log)

@@ -46,11 +46,16 @@ updateCompleted(isCompleted){
     // .then(data => {
     //         return new User (this.id, this.name, this.age)
     //     })
+    // if no more questions - game over
+    .catch(err => {
+        console.log(err);
+        
+        
+    })
 }
 
 
 // RETRIEVE
-// GET adventure for user by userquestionid
 
 static getMostRecentUserQuestion(userId){
     return db.one(`select userquestions.id,user_id,question_id,response, completed
