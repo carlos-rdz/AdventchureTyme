@@ -45,6 +45,14 @@ class User {
         })
     }
 
+    static getUserByPhonenumber(phonenumber){
+        return db.one(
+        `select * from users where phonenumber=$1`,[phonenumber]
+        )
+        .then(data => {
+            return new User (data.id,data.name,data.phonenumber,data.username)
+        })
+    }
     static getAllUsers(){
         return db.any(
             `select * from users`

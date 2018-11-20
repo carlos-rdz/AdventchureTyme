@@ -60,11 +60,11 @@ static getMostRecentUserQuestion(userId){
    join adventures
    on adventures.id = questions.adventure_id
    and completed is NULL
-   where user_id = 4
+   where user_id = $1
    order by questions.ord
    limit 1`,[userId])
         .then(data => {
-            return new UserQuestions (data.id, data.userId, data.question_id, data.response, data.completed)
+            return new UserQuestions (data.id, data.user_id, data.question_id, data.response, data.completed)
         })
 }
     

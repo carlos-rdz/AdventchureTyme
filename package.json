@@ -1,9 +1,9 @@
 {
   "name": "scavenger",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
+    "debug": "node --inspect-brk index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "reset-db": "dropdb scavengerdb; createdb scavengerdb; psql -f schema.sql scavengerdb; psql -f seed.sql scavengerdb ; psql scavengerdb < node_modules/connect-pg-simple/table.sql"
   },
@@ -19,9 +19,20 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "follow-redirects": "^1.5.9",
+    "hibp": "^7.2.1",
     "image-download": "^1.1.0",
     "pg-promise": "^8.5.2",
-    "twilio": "^3.23.2",
-    "hibp": "^7.2.1"
-  }
+    "twilio": "^3.23.2"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carlos-rdz/Scavenger-Hunt.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/carlos-rdz/Scavenger-Hunt/issues"
+  },
+  "homepage": "https://github.com/carlos-rdz/Scavenger-Hunt#readme",
+  "description": ""
 }

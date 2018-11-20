@@ -16,8 +16,8 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const db = require('./models/db');
 
-questions.getQuestionsByQuestion_Id(1)
-    .then(console.log)
+// questions.getQuestionsByQuestion_Id(1)
+//     .then(console.log)
 // userquestions.getMostRecentUserQuestion(4)
     // .then(data => {
     //     return data.updateResponse("this is an answer")
@@ -209,17 +209,13 @@ app.post('/profile', protectRoute, (req,res) => {
 });
 
 app.post('/start', protectRoute, (req,res) => {
-// need to grab user ids from session
-// need to grab adventure ids from submit
     let user = req.session.user;
-    let adventure = req.body.adventureObject
-
-    console.log(adventure)
-    message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
-    res.send(page(`Check your phone and have fun ${user.name}!`, req.session.user));
-    
-    
-    // res.redirect('/sms');
+    console.log(user);
+    let adventure = req.body.adventureObject;
+    //  message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
+     message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `${user.phonenumber}` );
+     issueFirstQuestion(user.id);
+    res.send(page(`Check your phone and have fun ${user.name}!`));
 });
 
 // Browse Adventure
@@ -251,49 +247,158 @@ const visionOCR = require('./scripts/visionOCR');
 
 
 app.post('/sms', (req, res) => {
-  const twiml = new MessagingResponse();
-  let getBody = req.body;
-  console.log(getBody);
+    console.log("got an sms from twilio");
+//   const twiml = new MessagingResponse();
+
+//   let getBody = req.body;
+//   console.log(getBody);
   let twilioUrl = req.body.MediaUrl0;
-    resolveURL(twilioUrl, (remoteAddress) => {
-        // console.log(remoteAddress);
-//   save image to temp storage
-        const fs = require('fs');
-        const imageDownload = require('image-download');
-        const imageType = require('image-type');
-        
-        imageDownload(`${remoteAddress}`).then(buffer => {
-            const type = imageType(buffer);
-        
-            fs.writeFile('./images/user_submit.' + type.ext, buffer, (err) => { 
-                console.log(err ? err : 'done!')
-                let localAddress = './images/user_submit.jpg'
-                visionOCR(localAddress)
-                .then(results => {
-                    text
-                    twiml.message('The Robots are coming! Head for the hills!');
-                })
-            });
-        });
+  let userPhone = req.body.From;
+//   console.log(userPhone);
+  users.getUserByPhonenumber(userPhone)
+//   .then(console.log);
+    .then(user => {
+    // retrieveAnswer(user.id);
+    return userquestions.getMostRecentUserQuestion(user.id)
     })
-  
-  res.writeHead(200, {'Content-Type': 'text/xml'});
-  res.end(twiml.toString());
+    .then(userQuestionObj => {
+        return Promise.all([questions.getQuestionsByQuestion_Id(userQuestionObj.question_id), userQuestionObj]) 
+    })
+    .then(dataArr => {
+        // dataArr[0] = questionObj
+        // dataArr[1] = userQuestionObj
+        return Promise.all([dataArr[0].answer, dataArr[1]])
+    })
+    .then(dataArr => {
+       return resolveURL(twilioUrl)
+        .then((remoteAddress) => {
+
+            // console.log(remoteAddress);
+    //   save image to temp storage
+            const fs = require('fs');
+            const imageDownload = require('image-download');
+            const imageType = require('image-type');
+            
+            return imageDownload(`${remoteAddress}`)
+            .then(buffer => {
+                const type = imageType(buffer);
+                return (new Promise( (resolve, reject) => {
+                    fs.writeFile('./images/user_submit.' + type.ext, buffer, (err) => { 
+                        // console.log(err ? err : 'done!')
+                        if (err){
+                            reject();
+                        }else{
+                            resolve(dataArr);
+                        }
+                    })
+                    
+                }))
+            })
+        })
+    // return dataArr;
+
+})
+.then(dataArr => {
+    // console.table(dataArr);
+   return Promise.all([visionOCR(), dataArr[0], dataArr[1]])
+})
+.then(dataArr => {
+    console.table(dataArr);
+
+    // [userText, answerText, userQuestionObj]
+    return validateText(dataArr[0],dataArr[1],dataArr[2]) 
+
+    
+})
+.then(userQuestionObj => {
+    // console.log("I got triggered");
+    // console.table(`userquestionobj ${userQuestionObj}`);
+    issueNextQuestion(userQuestionObj)   
+
+})
+    
+    // res.writeHead(200, {'Content-Type': 'text/xml'});
+    // res.end(twiml.toString());
 });
 
 // Twilio hosts mms images on S3servers and the MediaUrl has to be resolved before 
 // I can actually use the address to write an img file locally
-function resolveURL(address, callback){
+function resolveURL(address){
     console.log("entered resolve url");
-    https.get(address,(response) => callback(response.responseUrl));     
+    return (new Promise((resolve, reject) => {
+        https.get(address,(response) => {   
+            if(response){
+                console.log(response);
+                resolve(response.responseUrl);
+            }else{
+                reject("Whoops");
+            }
+        });     
+    }));
+
 };
 
-// function validateText(textArr, correctAnswer){
-//     // recieve an arrar of objects
-//     for(let i = 0; i < textArr.length; i++){
-//         if (textArr[i].description === '')
+function validateText(userAnswer, correctAnswer, userQuestionObj){
+    console.table(userQuestionObj)
+    // toLowerCase ensures case independent string comparison 
+    const userAnswerStr = userAnswer.toLowerCase();
+    const correctAnswerStr = correctAnswer.toLowerCase();
+    console.log(userAnswerStr);
+    console.log(correctAnswerStr);
+    if (userAnswerStr.includes(correctAnswerStr)){
+        console.table(`userquestionobj ${userQuestionObj}`);
+        return userQuestionObj.updateCompleted('true')
+        .then(()=> userQuestionObj) 
+    }else{
+        console.log("This flagged as false");
+        return userQuestionObj.updateCompleted() 
+        .then(()=> userQuestionObj) 
+
+        //answer not found
+    //     message('That image doesn\'t seem correct. Please try again making sure your picture is squarely-facing your signage and where possible, try including just the sign text you\'re trying to submit.','+16789448410', `${userQuestionObj.phonenumber}` );
+    }
+    // return userQuestionObj;
+
+}
+
+// function retrieveAnswer(userID){
+//     // same process to get answer as a question. Just return the answer instead
+//     userquestions.getMostRecentUserQuestion(userID)
+//         .then(data => {
+//             return questions.getQuestionsByQuestion_Id(data.question_id) 
+//         })
+//         // .then(questionObj => {
+//         //     return questionObj.answer;
+//         // })
+         
 //     }
-// }
+
+function issueFirstQuestion(userID){
+    userquestions.getMostRecentUserQuestion(userID)
+        .then(data => {
+            return questions.getQuestionsByQuestion_Id(data.question_id) 
+        })
+        .then(data => {
+            return Promise.all([data, users.getUserById(userID)])
+        })
+        .then(dataArr => {
+            message(`${dataArr[0].question}`, `+16789448410`, `${dataArr[1].phonenumber}` );
+        });
+    }
+
+function issueNextQuestion(userQuestionObj){
+    console.table(`questionObj ${userQuestionObj}`);
+    userquestions.getMostRecentUserQuestion(userQuestionObj.user_id)
+        .then(data => {
+            return questions.getQuestionsByQuestion_Id(data.question_id) 
+        })
+        .then(data => {
+            return Promise.all([data, users.getUserById(userQuestionObj.user_id)])
+        })
+        .then(dataArr => {
+            message(`${dataArr[0].question}`, `+16789448410`, `${dataArr[1].phonenumber}` );
+        });
+    }
 
 app.listen(3000, () => {
     console.log('your express app is readddddy')
