@@ -18,11 +18,7 @@ const client = new vision.ImageAnnotatorClient();
 /**
  * TODO(developer): Uncomment the following line before running the sample.
  */
-<<<<<<< HEAD
-// const imgAddress = './images/IMG_8855.jpg';
-=======
 //  const imgAddress = './images/user_submit.jpg';
->>>>>>> blatch/imageValidation
 
 // Performs text detection on the local file
 function extractText(){
@@ -31,13 +27,8 @@ function extractText(){
   .then(results => {
     const detections = results[0].textAnnotations;
     console.log('Text:');
-<<<<<<< HEAD
-    detections.forEach(text => console.log(text));
-    return detections;
-=======
     // detections.forEach(text => console.log(text));
     return detections[0].description;
->>>>>>> blatch/imageValidation
   })
   .catch(err => {
     console.error('ERROR:', err);
