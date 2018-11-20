@@ -247,11 +247,6 @@ const visionOCR = require('./scripts/visionOCR');
 
 
 app.post('/sms', (req, res) => {
-    console.log("got an sms from twilio");
-//   const twiml = new MessagingResponse();
-
-//   let getBody = req.body;
-//   console.log(getBody);
   let twilioUrl = req.body.MediaUrl0;
   let userPhone = req.body.From;
 //   console.log(userPhone);
@@ -313,8 +308,12 @@ app.post('/sms', (req, res) => {
 .then(userQuestionObj => {
     // console.log("I got triggered");
     // console.table(`userquestionobj ${userQuestionObj}`);
-    issueNextQuestion(userQuestionObj)   
-
+    debugger;
+    if(userquestions.getMostRecentUserQuestion(userQuestionObj.user_id)){
+        issueNextQuestion(userQuestionObj);
+    }else{
+        console.log("no more messages, game over");
+    }  
 })
     
     // res.writeHead(200, {'Content-Type': 'text/xml'});
@@ -397,7 +396,9 @@ function issueNextQuestion(userQuestionObj){
         })
         .then(dataArr => {
             message(`${dataArr[0].question}`, `+16789448410`, `${dataArr[1].phonenumber}` );
-        });
+        })
+        .catch(err)
+        message(`You'r`)
     }
 
 app.listen(3000, () => {
