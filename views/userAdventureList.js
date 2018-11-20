@@ -1,6 +1,6 @@
 function adventureToItem(adventureObject){
     return `
-    <div class="row justify-content-start top-buffer">
+    <div class="row justify-content-start top-buffer mb-4">
     <div class="col-sm">
     ${adventureObject.name}
     </div>

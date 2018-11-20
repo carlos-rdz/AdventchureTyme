@@ -6,21 +6,21 @@ function signupForm(){
     
     <form action="/signup" method="POST">
     
-    <div class="row top-buffer">
-    <label class="col-sm"> Name </label>
-        <input class="col-sm" type="text" name="name" >
+    <div class="row justify-content-start mb-4">
+    <label class="col-3"> Name </label>
+        <input class="col-3 mr-4" type="text" name="name" >
     </div>
-     <div class="row top-buffer">
-    <label class="col-sm"> Phone Number </label>
-        <input class="col-sm" type="text" name="phonenumber" >
+     <div class="row justify-content-start mb-4">
+    <label class="col-3"> Phone Number </label>
+        <input class="col-3 mr-4" type="text" name="phonenumber" >
         </div>
-        <div class="row top-buffer">
-    <label class="col-sm"> Username </label>
-        <input class="col-sm" type="text" name="username" >
+        <div class="row justify-content-start mb-4">
+    <label class="col-3"> Username </label>
+        <input class="col-3 mr-4" type="text" name="username" >
         </div>
-        <div class="row top-buffer">
-    <label class="col-sm"> Password </label>    
-        <input class="col-sm" type="password" name="password" >
+        <div class="row justify-content-start mb-4">
+    <label class="col-3"> Password </label>    
+        <input class="col-3 mr-4" type="password" name="password" >
         </div>
     <br>
         <input type="submit">
