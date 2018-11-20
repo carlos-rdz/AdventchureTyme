@@ -7,7 +7,7 @@ class User {
     constructor(id,name,phonenumber,username,phash) {
         this.id = id;
         this.name = name;
-        this.phonenumber = "+1" + phonenumber;
+        this.phonenumber = phonenumber;
         this.username = username;
         this.phash = phash;
     }

@@ -66,6 +66,10 @@ static getMostRecentUserQuestion(userId){
         .then(data => {
             return new UserQuestions (data.id, data.user_id, data.question_id, data.response, data.completed)
         })
+        .catch(()=>{
+            console.log(".catch ran");
+            return "error";
+        })
 }
     
 

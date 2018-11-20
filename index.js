@@ -132,7 +132,7 @@ app.get('/signup', (req, res) => {
 
 app.post('/signup', (req, res) => {
     const newName = req.body.name;
-    const newPhoneNumber = req.body.phonenumber;
+    const newPhoneNumber = "+1" + req.body.phonenumber;
     const newUsername = req.body.username;
     const newPassword = req.body.password;
 
@@ -242,7 +242,6 @@ app.get('/sms', (req,res)=> {
 // Twilio incoming
 
 // incoming message
-const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const visionOCR = require('./scripts/visionOCR');
 
 
@@ -308,16 +307,20 @@ app.post('/sms', (req, res) => {
 .then(userQuestionObj => {
     // console.log("I got triggered");
     // console.table(`userquestionobj ${userQuestionObj}`);
-    debugger;
-    if(userquestions.getMostRecentUserQuestion(userQuestionObj.user_id)){
-        issueNextQuestion(userQuestionObj);
-    }else{
-        console.log("no more messages, game over");
-    }  
-})
+        return userquestions.getMostRecentUserQuestion(userQuestionObj.user_id)
+        .then(result => {
+            if(result === "error"){
+                console.log("no more messages, game over");
+                users.getUserById(userQuestionObj.user_id)
+                .then(userObj => {
+                    message("Hey you won!", `+16789448410`, `${userObj.phonenumber}` );   
+                })
+            }else{
+                issueNextQuestion(userQuestionObj);
+            }  
+        })  
+    })
     
-    // res.writeHead(200, {'Content-Type': 'text/xml'});
-    // res.end(twiml.toString());
 });
 
 // Twilio hosts mms images on S3servers and the MediaUrl has to be resolved before 
@@ -327,7 +330,7 @@ function resolveURL(address){
     return (new Promise((resolve, reject) => {
         https.get(address,(response) => {   
             if(response){
-                console.log(response);
+                // console.log(response);
                 resolve(response.responseUrl);
             }else{
                 reject("Whoops");
@@ -395,10 +398,9 @@ function issueNextQuestion(userQuestionObj){
             return Promise.all([data, users.getUserById(userQuestionObj.user_id)])
         })
         .then(dataArr => {
-            message(`${dataArr[0].question}`, `+16789448410`, `${dataArr[1].phonenumber}` );
+            message(`Good Job! Here's your next question: ${dataArr[0].question}`, `+16789448410`, `${dataArr[1].phonenumber}` );
         })
-        .catch(err)
-        message(`You'r`)
+   
     }
 
 app.listen(3000, () => {
