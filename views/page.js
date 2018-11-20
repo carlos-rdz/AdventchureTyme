@@ -14,18 +14,20 @@ function page(content,isLoggedIn=false){
       
       </head>
 
-      <body >
-     
-        <div class="p-3 mb-2 bg-secondary text-white">
-          ${
-            isLoggedIn ? logoutButton() : loginOrRegister()
+      <body>
+      <div class="p-3 mb-2 bg-secondary text-white">
+      ${
+        isLoggedIn ? logoutButton() : loginOrRegister()
           }
           
-        </div>
-        <div class="p-3 mb-2 bg-light text-dark">
+          </div>
+          <div class="p-3 mb-2 bg-light text-dark">
           ${content}
-        </div>
-          
+          </div>
+          <img style="width:100%" src="./images/heroimage.jpg" alt="">
+          <div class="p-3 mb-2 bg-secondary text-white">
+          Our Footer
+          </div>
     
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
