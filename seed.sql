@@ -15,7 +15,7 @@ insert into questions
 values
 ('While many wooden overpasses exist in and around Marietta, this one one the square is of the rock variety. It''s most trafficked on Sundays....','Stonebridge',1,2),
 ('The square has an extra "avenue" on it. Best if you take Fido along with you.','Bark Street',2,2),
-('Cobb County was created Dec. 3, 1832. Find this historical marker to learn how the city of Marietta was named.','County',3,2)
+('Cobb County was created Dec. 3, 1832. Find this historical marker to learn how the city of Marietta was named.','Cobb County',3,2)
 -- ('While not the only one of these on the square it has "cornered" the market on expensive metals.','Hamilton Jewelers',4,2),
 -- ('This shop specalizes in effervescence. Small ones...I hear the flavored tapioca add-in''s are tasty if that is your cup of tea.','Tiny',5,2),
 -- ('This historic hotel served soldiers and civilians in the 1860''s. It is best known as the staging point for the Great Locomotive Chase. Find this plaque outside the hotel.','Kennesaw House',6,2),

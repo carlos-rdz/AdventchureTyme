@@ -9,30 +9,17 @@ function adventureToItem(adventureObject){
     <input type="hidden" name="adventureObject" value=${adventureObject.id}>
     </form>
     </div>
-
-  
     `
-
-    // can i send the adventure id here???
-
-    // <div> <a href ="/profile/:id([0-9]+)">Add</a> </div>
-    
-    // should redirect to session id profile
 }
 
-
 function userAdventureList(arrayOfAdventures){
-    
     const adventureItems = arrayOfAdventures.map(adventureToItem).join('');
-    
+        return `
 
-
-    return `
-
-    <div class="container">
-        ${adventureItems}
-    </div>
-    `
+        <div class="container">
+            ${adventureItems}
+        </div>
+        `
 }
 
 
