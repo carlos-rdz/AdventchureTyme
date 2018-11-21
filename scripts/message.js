@@ -5,13 +5,15 @@ let client = new twilio(process.env.ACCOUNT_SID , process.env.AUTH_TOKEN);
 // let to = '+17146093784';
 
 function start(body, from, to){
-        client.messages
+        return client.messages
         .create({ from: from, 
                     body: body, 
                     to: to
                 })
             .then(message => console.log(message.sid))
-            .done();
+            // .done()
+            // .then(()=>{
+            // })
 };
 
 module.exports = start;

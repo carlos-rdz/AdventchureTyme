@@ -76,6 +76,7 @@ app.use((req, res, next) => {
 // Homepage
 //----------
 app.get('/', (req, res) => {
+    console.log(req.session);
     const thePage = page('Welcome! Please login or signup to continue', req.session.user);
     res.send(thePage);
 }); 
@@ -112,9 +113,10 @@ app.post('/login', (req, res) => {
 //--------
 app.post(`/logout`, (req, res) => {
     // kill the session
-    req.session.destroy();
+    req.session.destroy(()=>{
+        res.redirect(`/`); 
+    });
     // redirect them to homepage
-    res.redirect(`/`);
 });
 
 // Signup
@@ -176,10 +178,12 @@ app.post('/profile', protectRoute, (req,res) => {
 
 app.post('/start', protectRoute, (req,res) => {
     let user = req.session.user;
-    message(`Welcome ${user.name}!`, `+16789448410`, `${user.phonenumber}` )
-    message(`In these adventures, you take a picture of signage with text representing your answer. Be as square as possible to the signage in question when taking a picture and we'll do the rest! Good Luck!`, `+16789448410`, `${user.phonenumber}`);
-    issueFirstQuestion(user.id);
-    res.send(page(`Check your phone and have fun ${user.name}!`));
+    // req.session.save(function(err){
+        message(`Welcome ${user.name}!`, `+16789448410`, `${user.phonenumber}` )
+        .then (() => message(`In these adventures, you take a picture of signage with text representing your answer. Be as square as possible to the signage in question when taking a picture and we'll do the rest! Good Luck!`, `+16789448410`, `${user.phonenumber}`))
+        .then(() => issueFirstQuestion(user.id))
+        res.send(page(`Check your phone and have fun ${user.name}!`,req.session.user));
+    // })
 });
 
 // Browse Adventure
@@ -345,3 +349,4 @@ function issueNextQuestion(userQuestionObj){
 app.listen(3000, () => {
     console.log('your express app is readddddy')
 });
+
