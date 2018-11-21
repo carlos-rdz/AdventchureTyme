@@ -176,7 +176,7 @@ app.post('/start', protectRoute, (req,res) => {
     message(`Welcome ${user.name}!`, `+16789448410`, `${user.phonenumber}` )
     message(`In these adventures, you take a picture of signage with text representing your answer. Be as square as possible to the signage in question when taking a picture and we'll do the rest! Good Luck!`, `+16789448410`, `${user.phonenumber}`);
     issueFirstQuestion(user.id);
-    res.send(page(`Check your phone and have fun! ${user.name}!`));
+    res.send(page(`Check your phone and have fun ${user.name}!`));
 });
 
 // Browse Adventure
