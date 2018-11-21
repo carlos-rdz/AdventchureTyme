@@ -107,7 +107,9 @@ app.post('/login', (req, res) => {
         .then(theUser => {
             if (theUser.passwordDoesMatch(thePassword)) {
                 req.session.user = theUser;
-                res.redirect(`/profile`);
+                req.session.save(function(err){
+                    res.redirect(`/profile`);
+                })
             } else {
                 res.redirect('/login');
             }
@@ -140,12 +142,14 @@ app.post('/signup', (req, res) => {
     //createUser needs more paramaters
     users.createUser(newName, newPhoneNumber, newUsername, newPassword)
         .catch(() => {
-            res.redirect('www.apple.com');
+            res.redirect('/');
         })
         .then(newUser => {
             // take them to the list of adventures
             req.session.user = newUser;
-            res.redirect('/browse');
+            req.session.save(function(err){  
+                res.redirect('/browse');
+            })
         });
     // have i been pwned???????????????????????????
         hibp
@@ -344,18 +348,6 @@ function validateText(userAnswer, correctAnswer, userQuestionObj){
         // .then(()=> userQuestionObj) 
     }
 }
-
-// function retrieveAnswer(userID){
-//     // same process to get answer as a question. Just return the answer instead
-//     userquestions.getMostRecentUserQuestion(userID)
-//         .then(data => {
-//             return questions.getQuestionsByQuestion_Id(data.question_id) 
-//         })
-//         // .then(questionObj => {
-//         //     return questionObj.answer;
-//         // })
-         
-//     }
 
 function validationError(userQuestionObj){
     users.getUserById(userQuestionObj.user_id)
