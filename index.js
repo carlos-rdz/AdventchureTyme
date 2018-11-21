@@ -10,6 +10,9 @@ const bodyParser = require('body-parser');
 const {https} = require('follow-redirects');
 const message = require('./scripts/message');
 
+// Google Vison
+const visionOCR = require('./scripts/visionOCR');
+
 // models
 const users = require('./models/users');
 const adventure = require('./models/adventure');
@@ -212,39 +215,39 @@ app.post('/sms', (req, res) => {
             return Promise.all([dataArr[0].answer, dataArr[1]])
         })
         .then(dataArr => {
-            // Twilio stores mms files on Amazon S3 servers but the response json 
-            // gives an additional url route that has to be resolved to copy the user
-            // txted image to feed to Google Vision
-        return resolveURL(twilioUrl)
-            .then((remoteAddress) => {
-            //writes image data to file
-                const fs = require('fs');
-                const imageDownload = require('image-download');
-                const imageType = require('image-type');
-                
-                return imageDownload(`${remoteAddress}`)
-                .then(buffer => {
-                    const type = imageType(buffer);
-                    // we had to make sure the image was stored prior to the answer validation 
-                    // further down the chain or it would check a previous image
-                    // so we wrapped it in a promise that forces a sequential order of excecution
-                    return (new Promise( (resolve, reject) => {
-                        fs.writeFile('./images/user_submit.' + type.ext, buffer, (err) => { 
-                            if (err){
-                                reject();
-                            }else{
-                                resolve(dataArr);
-                            }
-                        })
-                        
-                    }))
+                // Twilio stores mms files on Amazon S3 servers but the response json 
+                // gives an additional url route that has to be resolved to copy the user
+                // txted image to feed to Google Vision
+            return resolveURL(twilioUrl)
+                .then((remoteAddress) => {
+                //writes image data to file
+                    const fs = require('fs');
+                    const imageDownload = require('image-download');
+                    const imageType = require('image-type');
+                    
+                    return imageDownload(`${remoteAddress}`)
+                    .then(buffer => {
+                        const type = imageType(buffer);
+                        // we had to make sure the image was stored prior to the answer validation 
+                        // further down the chain or it would check a previous image
+                        // so we wrapped it in a promise that forces a sequential order of excecution
+                        return (new Promise( (resolve, reject) => {
+                            fs.writeFile('./images/user_submit.' + type.ext, buffer, (err) => { 
+                                if (err){
+                                    reject();
+                                }else{
+                                    resolve(dataArr);
+                                }
+                            })
+                            
+                        }))
+                    })
                 })
             })
-        })
         // Now with our image stored we can pass is to Google to spit back 
         // any text it recognizes in the image as a string.
         .then(dataArr => {
-        return Promise.all([visionOCR(), dataArr[0], dataArr[1]])
+            return Promise.all([visionOCR(), dataArr[0], dataArr[1]])
         })
         .then(dataArr => {
             // With the text returned from Google, the correct answer and the userObj
