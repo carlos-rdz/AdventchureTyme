@@ -67,7 +67,7 @@ static getMostRecentUserQuestion(userId){
             return new UserQuestions (data.id, data.user_id, data.question_id, data.response, data.completed)
         })
         .catch(()=>{
-            console.log(".catch ran");
+            // console.log(".catch ran");
             return "error";
         })
 }

@@ -289,39 +289,20 @@ app.post('/sms', (req, res) => {
                 }))
             })
         })
-    // return dataArr;
-
-})
-.then(dataArr => {
-    // console.table(dataArr);
-   return Promise.all([visionOCR(), dataArr[0], dataArr[1]])
-})
-.then(dataArr => {
-    console.table(dataArr);
-
-    // [userText, answerText, userQuestionObj]
-    return validateText(dataArr[0],dataArr[1],dataArr[2]) 
-
-    
-})
-.then(userQuestionObj => {
-    // console.log("I got triggered");
-    // console.table(`userquestionobj ${userQuestionObj}`);
-        return userquestions.getMostRecentUserQuestion(userQuestionObj.user_id)
-        .then(result => {
-            if(result === "error"){
-                console.log("no more messages, game over");
-                users.getUserById(userQuestionObj.user_id)
-                .then(userObj => {
-                    message("Hey you won!", `+16789448410`, `${userObj.phonenumber}` );   
-                })
-            }else{
-                issueNextQuestion(userQuestionObj);
-            }  
-        })  
     })
-    
+
+    .then(dataArr => {
+        // console.table(dataArr);
+    return Promise.all([visionOCR(), dataArr[0], dataArr[1]])
+    })
+    .then(dataArr => {
+        console.table(dataArr);
+        // [userText, answerText, userQuestionObj]
+        return validateText(dataArr[0],dataArr[1],dataArr[2]) 
+    });
 });
+
+  
 
 // Twilio hosts mms images on S3servers and the MediaUrl has to be resolved before 
 // I can actually use the address to write an img file locally
@@ -349,18 +330,19 @@ function validateText(userAnswer, correctAnswer, userQuestionObj){
     console.log(correctAnswerStr);
     if (userAnswerStr.includes(correctAnswerStr)){
         console.table(`userquestionobj ${userQuestionObj}`);
+        // call issueNextQuest here because we know it's true
         return userQuestionObj.updateCompleted('true')
-        .then(()=> userQuestionObj) 
+        .then(()=> {
+            issueNextQuestion(userQuestionObj)
+        })
+        // .then(()=> userQuestionObj) 
     }else{
+        // here just send a message() becasue it's false
         console.log("This flagged as false");
-        return userQuestionObj.updateCompleted() 
-        .then(()=> userQuestionObj) 
-
-        //answer not found
-    //     message('That image doesn\'t seem correct. Please try again making sure your picture is squarely-facing your signage and where possible, try including just the sign text you\'re trying to submit.','+16789448410', `${userQuestionObj.phonenumber}` );
+        validationError(userQuestionObj);
+        // return userQuestionObj.updateCompleted() 
+        // .then(()=> userQuestionObj) 
     }
-    // return userQuestionObj;
-
 }
 
 // function retrieveAnswer(userID){
@@ -374,6 +356,13 @@ function validateText(userAnswer, correctAnswer, userQuestionObj){
 //         // })
          
 //     }
+
+function validationError(userQuestionObj){
+    users.getUserById(userQuestionObj.user_id)
+    .then(userObj => {
+        message('That image doesn\'t seem correct. Please try again making sure your picture is squarely-facing your signage and where possible, try including just the sign text you\'re trying to submit.','+16789448410', `${userObj.phonenumber}` )    
+    })
+}
 
 function issueFirstQuestion(userID){
     userquestions.getMostRecentUserQuestion(userID)
@@ -390,18 +379,36 @@ function issueFirstQuestion(userID){
 
 function issueNextQuestion(userQuestionObj){
     console.table(`questionObj ${userQuestionObj}`);
-    userquestions.getMostRecentUserQuestion(userQuestionObj.user_id)
-        .then(data => {
-            return questions.getQuestionsByQuestion_Id(data.question_id) 
-        })
-        .then(data => {
-            return Promise.all([data, users.getUserById(userQuestionObj.user_id)])
-        })
-        .then(dataArr => {
-            message(`Good Job! Here's your next question: ${dataArr[0].question}`, `+16789448410`, `${dataArr[1].phonenumber}` );
-        })
+    return userquestions.getMostRecentUserQuestion(userQuestionObj.user_id)
+    .then(result => {
+        if(result === "error"){
+            console.log("no more messages, game over");
+            return users.getUserById(userQuestionObj.user_id)
+            .then(userObj => {
+                message("Hey you won!", `+16789448410`, `${userObj.phonenumber}` );   
+            })
+            // else serve next message
+        }else{
+            return users.getUserById(userQuestionObj.user_id)
+            .then(userObj => {
+                return questions.getQuestionsByQuestion_Id(result.question_id)
+                .then(questionObj=> {
+                    message(`Good Job! Here's your next question: ${questionObj.question}`, `+16789448410`, `${userObj.phonenumber}` );
+                })
+            })
+        }
+    })    
+}
+    // .then(data => {
+    //         return questions.getQuestionsByQuestion_Id(data.question_id) 
+    //     })
+    //     .then(data => {
+    //         return Promise.all([data, users.getUserById(userQuestionObj.user_id)])
+    //     })
+    //     .then(dataArr => {
+    //         message(`Good Job! Here's your next question: ${dataArr[0].question}`, `+16789448410`, `${dataArr[1].phonenumber}` );
+    //     })
    
-    }
 
 app.listen(3000, () => {
     console.log('your express app is readddddy')
