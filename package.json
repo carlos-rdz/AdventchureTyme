@@ -19,7 +19,6 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "follow-redirects": "^1.5.9",
-    "hibp": "^7.2.1",
     "image-download": "^1.1.0",
     "pg-promise": "^8.5.2",
     "twilio": "^3.23.2"

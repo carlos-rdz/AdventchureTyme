@@ -8,26 +8,15 @@ function adventureToItem(adventureObject){
     </form>
     </div>
     `
-    // <div> <a href ="/profile/:id([0-9]+)">Add</a> </div>
-    
-    // should redirect to session id profile
 }
 
-
 function adventureList(arrayOfAdventures){
-    
     const adventureItems = arrayOfAdventures.map(adventureToItem).join('');
-    
-
-
-    return `
+      return `
         <div class="container">
-        
         ${adventureItems}
-        
         </div> 
     `
 }
-
 
 module.exports = adventureList

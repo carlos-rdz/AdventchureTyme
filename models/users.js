@@ -11,7 +11,7 @@ class User {
         this.username = username;
         this.phash = phash;
     }
-// CREATE
+    // CREATE
     static createUser(name,phonenumber,username,password){
         console.log(`phone ${phonenumber}`);
         const salt = bcrypt.genSaltSync(saltRounds)
@@ -26,7 +26,7 @@ class User {
             })
     }
 
-// RETRIEVE
+    // RETRIEVE
     static getUserByUserName(username){
         return db.one(
         `select * from users where username=$1`,[username]
@@ -53,6 +53,7 @@ class User {
             return new User (data.id,data.name,data.phonenumber,data.username)
         })
     }
+
     static getAllUsers(){
         return db.any(
             `select * from users`
@@ -69,14 +70,12 @@ class User {
         return didMatch;
     }
 
+
+ // Remaining CRUD functionality implemented when users can create their own adventures
+
 // UPDATE
 
-
-
-
-// DELETE
-
-
+// DELETE   
 
 
 

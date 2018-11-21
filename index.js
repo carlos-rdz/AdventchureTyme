@@ -1,33 +1,32 @@
 require('dotenv').config();
 
+const express = require('express');
+const app = express();
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const bodyParser = require('body-parser');
+
+// Twilio features require
+const {https} = require('follow-redirects');
+const message = require('./scripts/message');
+
+// models
 const users = require('./models/users');
 const adventure = require('./models/adventure');
 const questions = require('./models/questions');
 const userquestions = require('./models/userquestions');
-// have i been pwned??
-const hibp = require('hibp');
-
-const express = require('express');
-const app = express();
-
-const bodyParser = require('body-parser');
-
-const session = require('express-session');
-const pgSession = require('connect-pg-simple')(session);
 const db = require('./models/db');
 
-// questions.getQuestionsByQuestion_Id(1)
-//     .then(console.log)
-// userquestions.getMostRecentUserQuestion(4)
-    // .then(data => {
-    //     return data.updateResponse("this is an answer")
-    // })
-    // .then(data => {
-    // return data.updateCompleted("true")}
-    // )
-    // .then(console.log)
+// views
+const page = require('./views/page');
+const loginForm = require('./views/loginForm');
+const signupForm = require('./views/signupForm');
+const adventureList = require('./views/adventureList');
+const showUser = require('./views/showUser');
+const userAdventureList = require('./views/userAdventureList');
 
 
+// session init
 app.use(session({
     store: new pgSession({
         pgPromise: db
@@ -45,12 +44,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Configure body-parser to read JSON bodies
 app.use(bodyParser.json());
     
-const page = require('./views/page');
-const loginForm = require('./views/loginForm');
-const signupForm = require('./views/signupForm');
-const adventureList = require('./views/adventureList');
-const showUser = require('./views/showUser');
-const userAdventureList = require('./views/userAdventureList');
 
 
 //========
@@ -71,9 +64,8 @@ function protectRoute(req, res, next) {
 // middleware
 app.use((req, res, next) => {
     let isLoggedIn = req.session.user ? true : false;
-    
-    console.log(req.session.user);
-    console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
+    // console.log(req.session.user);
+    // console.log(`On ${req.path}, is a user logged in? ${isLoggedIn}`);
     // We call the next function
     next();
 });
@@ -81,40 +73,38 @@ app.use((req, res, next) => {
 // Homepage
 //----------
 app.get('/', (req, res) => {
-    const thePage = page('Welcome.  Please login or signup to continue', req.session.user);
+    const thePage = page('Welcome! Please login or signup to continue', req.session.user);
     res.send(thePage);
 }); 
 
 // Login
 //-------
 app.get('/login', (req, res) => {
-    const theForm = loginForm();
-    const thePage = page(theForm);
-    res.send(thePage);
+    res.send(page(loginForm()));
 });
 
 app.post('/login', (req, res) => {
     const theUsername = req.body.username;
     const thePassword = req.body.password;
 
-    // find User by username - need RETRIEVE for findByUsername
     users.getUserByUserName(theUsername)
         .catch(err => {
             console.log(err);
             res.redirect('/login');
         })
-        // Check if password matches - need bcrypt first
+        // Check if passwords match via bcrypt
         .then(theUser => {
             if (theUser.passwordDoesMatch(thePassword)) {
                 req.session.user = theUser;
                 req.session.save(function(err){
-                    res.redirect(`/profile`);
-                })
-            } else {
+                    res.redirect('/profile');
+                });
+            }else {
                 res.redirect('/login');
             }
         });
     });
+
 // Logout
 //--------
 app.post(`/logout`, (req, res) => {
@@ -127,19 +117,18 @@ app.post(`/logout`, (req, res) => {
 // Signup
 //--------
 app.get('/signup', (req, res) => {
-    const theForm = signupForm();
-    const thePage = page(theForm);
-    res.send(thePage);
+    res.send(page(signupForm()));
 });
 
 app.post('/signup', (req, res) => {
     const newName = req.body.name;
+    // twilio prefers the '+1' for more reliability so we prepend 
+    // it instead of having the user input it
     const newPhoneNumber = "+1" + req.body.phonenumber;
     const newUsername = req.body.username;
     const newPassword = req.body.password;
 
     //add user
-    //createUser needs more paramaters
     users.createUser(newName, newPhoneNumber, newUsername, newPassword)
         .catch(() => {
             res.redirect('/');
@@ -151,23 +140,6 @@ app.post('/signup', (req, res) => {
                 res.redirect('/browse');
             })
         });
-    // have i been pwned???????????????????????????
-        hibp
-            .search(`${newUsername}`)
-            .then(data => {
-                if (data.breaches || data.pastes) {
-                    // Bummer...
-                    console.log(data);
-                } else {
-                    // Phew! We're clear.
-                    console.log(`Good news — no pwnage found on username ${newUsername}!`);
-                }
-        })
-        .catch(err => {
-        // Something went wrong.
-        console.log(err.message);
-    });
-
 });
 
 // Profile
@@ -179,19 +151,9 @@ app.get('/profile',protectRoute, (req,res) => {
         .then(advArray => {
         res.send(page(userAdventureList(advArray),req.session.user));
         });
-    // users.getUserById(req.session.user.id)
-    //     .catch(err => {
-    //         console.log(err);
-    //         res.redirect('/login');
-    //     })
-    //     .then(theUser => {
-    //         res.send(theUser);
-    //     })
 });
 
 app.post('/profile', protectRoute, (req,res) => {
-// need to grab user ids from session
-// need to grab adventure ids from submit
     let adventureId = req.body.adventureId;
     let userId = req.session.user.id;
     questions.getQuestionsByAdventure(adventureId)
@@ -200,26 +162,21 @@ app.post('/profile', protectRoute, (req,res) => {
             return userquestions.createUserQuestions(userId,data)
         })
         // this displays the users adventures
-        // .then(console.log)
         .then(data => {
             return adventure.getAdventuresByUserId(userId)
         })
-            // need to write a view that takes a list of adventures as an argument and returns html list with add button
         .then(dataArray => {
             res.redirect('/profile');
-            //  res.send(page(userAdventureList(dataArray)))
         })
         
 });
 
 app.post('/start', protectRoute, (req,res) => {
     let user = req.session.user;
-    console.log(user);
-    let adventure = req.body.adventureObject;
-    //  message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
-     message(`Welcome ${user.name} to the ${adventure.name} Adventure! Good Luck!`, '+16789448410', `${user.phonenumber}` );
-     issueFirstQuestion(user.id);
-    res.send(page(`Check your phone and have fun ${user.name}!`));
+    message(`Welcome ${user.name}!`, `+16789448410`, `${user.phonenumber}` )
+    message(`In these adventures, you take a picture of signage with text representing your answer. Be as square as possible to the signage in question when taking a picture and we'll do the rest! Good Luck!`, `+16789448410`, `${user.phonenumber}`);
+    issueFirstQuestion(user.id);
+    res.send(page(`Check your phone and have fun! ${user.name}!`));
 });
 
 // Browse Adventure
@@ -233,78 +190,68 @@ app.get('/browse', protectRoute, (req, res) => {
 });
 
 // Twilio integration
-const {https} = require('follow-redirects');
-const message = require('./scripts/message');
-// will text message on route, but just a function 
-// can call it anywhere if we pass appropriate params
-app.get('/sms', (req,res)=> {
-    let user = req.session.user;
-    message(`Welcome ${user.name} to the Adventure! Good Luck!`, '+16789448410', `+1`+`${user.phonenumber}` );
-    res.send("message sent");
-});
 
-// Twilio incoming
-
-// incoming message
-const visionOCR = require('./scripts/visionOCR');
-
-
+// on incoming text message
 app.post('/sms', (req, res) => {
-  let twilioUrl = req.body.MediaUrl0;
-  let userPhone = req.body.From;
-//   console.log(userPhone);
-  users.getUserByPhonenumber(userPhone)
-//   .then(console.log);
-    .then(user => {
-    // retrieveAnswer(user.id);
-    return userquestions.getMostRecentUserQuestion(user.id)
-    })
-    .then(userQuestionObj => {
-        return Promise.all([questions.getQuestionsByQuestion_Id(userQuestionObj.question_id), userQuestionObj]) 
-    })
-    .then(dataArr => {
-        // dataArr[0] = questionObj
-        // dataArr[1] = userQuestionObj
-        return Promise.all([dataArr[0].answer, dataArr[1]])
-    })
-    .then(dataArr => {
-       return resolveURL(twilioUrl)
-        .then((remoteAddress) => {
-
-            // console.log(remoteAddress);
-    //   save image to temp storage
-            const fs = require('fs');
-            const imageDownload = require('image-download');
-            const imageType = require('image-type');
-            
-            return imageDownload(`${remoteAddress}`)
-            .then(buffer => {
-                const type = imageType(buffer);
-                return (new Promise( (resolve, reject) => {
-                    fs.writeFile('./images/user_submit.' + type.ext, buffer, (err) => { 
-                        // console.log(err ? err : 'done!')
-                        if (err){
-                            reject();
-                        }else{
-                            resolve(dataArr);
-                        }
-                    })
-                    
-                }))
+    // pull mms url from txt msg
+    let twilioUrl = req.body.MediaUrl0;
+    // pull phone num of sender
+    let userPhone = req.body.From;
+    users.getUserByPhonenumber(userPhone)
+        .then(user => {
+            // gets the object associating a question with a user
+            return userquestions.getMostRecentUserQuestion(user.id)
+        })
+        .then(userQuestionObj => {
+            // gets the actual question text and passes data for use down the promise chain
+            return Promise.all([questions.getQuestionsByQuestion_Id(userQuestionObj.question_id), userQuestionObj]) 
+        })
+        .then(dataArr => {
+            // dataArr[0] = contains answer text from the question object
+            // dataArr[1] = contains the userQuestionObj to be passed down the chain
+            return Promise.all([dataArr[0].answer, dataArr[1]])
+        })
+        .then(dataArr => {
+            // Twilio stores mms files on Amazon S3 servers but the response json 
+            // gives an additional url route that has to be resolved to copy the user
+            // txted image to feed to Google Vision
+        return resolveURL(twilioUrl)
+            .then((remoteAddress) => {
+            //writes image data to file
+                const fs = require('fs');
+                const imageDownload = require('image-download');
+                const imageType = require('image-type');
+                
+                return imageDownload(`${remoteAddress}`)
+                .then(buffer => {
+                    const type = imageType(buffer);
+                    // we had to make sure the image was stored prior to the answer validation 
+                    // further down the chain or it would check a previous image
+                    // so we wrapped it in a promise that forces a sequential order of excecution
+                    return (new Promise( (resolve, reject) => {
+                        fs.writeFile('./images/user_submit.' + type.ext, buffer, (err) => { 
+                            if (err){
+                                reject();
+                            }else{
+                                resolve(dataArr);
+                            }
+                        })
+                        
+                    }))
+                })
             })
         })
-    })
-
-    .then(dataArr => {
-        // console.table(dataArr);
-    return Promise.all([visionOCR(), dataArr[0], dataArr[1]])
-    })
-    .then(dataArr => {
-        console.table(dataArr);
-        // [userText, answerText, userQuestionObj]
-        return validateText(dataArr[0],dataArr[1],dataArr[2]) 
+        // Now with our image stored we can pass is to Google to spit back 
+        // any text it recognizes in the image as a string.
+        .then(dataArr => {
+        return Promise.all([visionOCR(), dataArr[0], dataArr[1]])
+        })
+        .then(dataArr => {
+            // With the text returned from Google, the correct answer and the userObj
+            // we can actually run the check now
+            return validateText(dataArr[0],dataArr[1],dataArr[2]) 
+        });
     });
-});
 
   
 
@@ -326,26 +273,21 @@ function resolveURL(address){
 };
 
 function validateText(userAnswer, correctAnswer, userQuestionObj){
-    console.table(userQuestionObj)
-    // toLowerCase ensures case independent string comparison 
+    // toLowerCase ensures case insensitive string comparison 
     const userAnswerStr = userAnswer.toLowerCase();
     const correctAnswerStr = correctAnswer.toLowerCase();
-    console.log(userAnswerStr);
-    console.log(correctAnswerStr);
+    // If the user submits a picture with the correct answer
+    // we issue the next question via Twilio
     if (userAnswerStr.includes(correctAnswerStr)){
         console.table(`userquestionobj ${userQuestionObj}`);
-        // call issueNextQuest here because we know it's true
         return userQuestionObj.updateCompleted('true')
         .then(()=> {
             issueNextQuestion(userQuestionObj)
         })
-        // .then(()=> userQuestionObj) 
+    //If the user answer didn't validate we send them an error message
+    //and let them try again with a new picture. 
     }else{
-        // here just send a message() becasue it's false
-        console.log("This flagged as false");
         validationError(userQuestionObj);
-        // return userQuestionObj.updateCompleted() 
-        // .then(()=> userQuestionObj) 
     }
 }
 
@@ -370,16 +312,20 @@ function issueFirstQuestion(userID){
     }
 
 function issueNextQuestion(userQuestionObj){
-    console.table(`questionObj ${userQuestionObj}`);
+    // Before issuing a question we check the db that there are more questions left
     return userquestions.getMostRecentUserQuestion(userQuestionObj.user_id)
     .then(result => {
+        // If our sql query throws an error we .catch it and know there 
+        // are no more questions left, therefore the user finished the adventure
+        // and we send a congradulatory message
         if(result === "error"){
-            console.log("no more messages, game over");
             return users.getUserById(userQuestionObj.user_id)
             .then(userObj => {
                 message("Hey you won!", `+16789448410`, `${userObj.phonenumber}` );   
             })
-            // else serve next message
+        // If the sql query has more questions we know the previous question 
+        // had to have been answered correctly so we combine a congratulatory message
+        // and send the next unanswered question
         }else{
             return users.getUserById(userQuestionObj.user_id)
             .then(userObj => {
@@ -391,21 +337,8 @@ function issueNextQuestion(userQuestionObj){
         }
     })    
 }
-    // .then(data => {
-    //         return questions.getQuestionsByQuestion_Id(data.question_id) 
-    //     })
-    //     .then(data => {
-    //         return Promise.all([data, users.getUserById(userQuestionObj.user_id)])
-    //     })
-    //     .then(dataArr => {
-    //         message(`Good Job! Here's your next question: ${dataArr[0].question}`, `+16789448410`, `${dataArr[1].phonenumber}` );
-    //     })
-   
+       
 
 app.listen(3000, () => {
     console.log('your express app is readddddy')
 });
-
-
-// users.createUser("test","7707513422","test","test")
-//     .then(console.log)

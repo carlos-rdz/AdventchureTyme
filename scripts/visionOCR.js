@@ -2,10 +2,7 @@
 const vision = require('@google-cloud/vision');
 
 // This shell cmd maps where the authentication json is stored. Will the json file need to go on the server then?
-// export GOOGLE_APPLICATION_CREDENTIALS="/Users/mblatchford/Digital Crafts/DigitalCrafts-ScavengerHunt-b7df5a3616de.json"
-
-// This shell cmd maps where the authentication json is stored. Will the json file need to go on the server then?
-// export GOOGLE_APPLICATION_CREDENTIALS="/Users/carlosrodriguez/DigitalCrafts/Scavenger/DigitalCrafts-ScavengerHunt-b7df5a3616de.json"
+// export GOOGLE_APPLICATION_CREDENTIALS="/PATH_TO_JSON_FILE/DigitalCrafts-ScavengerHunt-b7df5a3616de.json"
 
 
 // // upload an image to bucket
@@ -21,6 +18,9 @@ const client = new vision.ImageAnnotatorClient();
 //  const imgAddress = './images/user_submit.jpg';
 
 // Performs text detection on the local file
+// Outputs array of objects with lots of data
+// First array object gives single string of all found text
+// Additional objects store what Google thought were word/grammar breaks individually
 function extractText(){
  return client
   .textDetection('./images/user_submit.jpg')
@@ -28,6 +28,7 @@ function extractText(){
     const detections = results[0].textAnnotations;
     console.log('Text:');
     // detections.forEach(text => console.log(text));
+    // returns all text found as single string
     return detections[0].description;
   })
   .catch(err => {
@@ -35,7 +36,7 @@ function extractText(){
   });
 }
 
-// REMOTE IMAGE TESTING
+// REMOTE IMAGE TESTING (for use with images hosted on Google Storage)
 //  /**
 //  * TODO(developer): Uncomment the following lines before running the sample.
 //  */
