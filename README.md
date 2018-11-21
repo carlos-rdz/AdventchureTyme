@@ -21,6 +21,7 @@ Twilio allows for a text messaging platform and mobile play while Google Vision 
 - Dealing with issues in hindsight concerning game logic/user flow that didn't come up during planning phases
 - .then .then .then .then .then......Promise chains forcing a particular sequence to occur
 - Pivoting to Google Vision when the first planned photo comparison with phash failed
+- Inital table creation for our db
 
 
 <!-- screenshots to be added -->
